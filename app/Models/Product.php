@@ -44,14 +44,6 @@ class Product extends Model
         'is_on_sale' => 'boolean',
     ];
 
-    protected static function booted(): void
-    {
-        static::creating(function ($product) {
-            if (empty($product->slug)) {
-                $product->slug = Str::slug($product->name);
-            }
-        });
-    }
 
     public function category()
     {
@@ -72,7 +64,11 @@ class Product extends Model
                     ->withPivot('value') 
                     ->withTimestamps();
     }
-
+    
+    public function variants(): HasMany
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
     public function images()
     {
         return $this->morphMany(Image::class, 'item');

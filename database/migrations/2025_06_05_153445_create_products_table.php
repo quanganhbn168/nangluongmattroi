@@ -21,9 +21,6 @@ return new class extends Migration
             $table->string('banner')->nullable();
             $table->decimal('price', 12, 2)->nullable();
             $table->decimal('price_discount', 12, 2)->nullable();
-            $table->boolean('is_featured')->default(0); 
-            $table->boolean('is_on_sale')->default(0);  
-            $table->boolean('is_home')->default(0);  
             $table->longText('description')->nullable();
             $table->longText('content')->nullable();
             $table->longText('specifications')->nullable();
@@ -34,6 +31,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
+            $table->foreign('unit_id')->references('id')->on('categories')->onDelete('cascade');
         });
     }
 

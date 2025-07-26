@@ -9,7 +9,7 @@
   "@type": "Store",
   "name": "{{$setting->name}}",
   "alternateName": "{{$setting->name}}",
-  "url": "https://maynenkhi-saman.vn/",
+  "url": "{{config(APP_URL)}}",
   "logo": "{{asset($setting->logo)}}",
   "description": "{{$setting->meta_description}}",
   "address": {
@@ -111,7 +111,7 @@
     @endforeach
 </section>
 <section class="section dichvu">
-    <h2 class="section-title"></h2>
+    <h2 class="section-title">Dịch vụ chúng tôi cung cấp</h2>
     <div class="container">
         
     </div>
