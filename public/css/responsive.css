@@ -1,0 +1,89 @@
+/* Tablet ngang (≤1200px) */
+@media (max-width: 1200px) {
+  body{
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+  .section {
+    padding: 4em 2em;
+  }
+  .header .header-main{
+    width: 100%;
+  }
+}
+
+/* Tablet dọc (≤992px) */
+@media (max-width: 992px) {
+  body{
+    font-size: 16px;
+  }
+  .section {
+    padding: 3em 1.5em;
+  }
+  .product-list-hot.grid-5 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Mobile lớn (≤768px) */
+@media (max-width: 768px) {
+  body{
+    font-size: 16px;
+  }
+  .section {
+    padding: 2.5em 1.2em;
+  }
+  .product-list-hot.grid-5 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Mobile phổ thông (≤576px) */
+@media (max-width: 576px) {
+  body{
+    font-size: 16px;
+  }
+  .section {
+    padding: 2em 1em;
+  }
+  .header-contact{
+    display: none;
+  }
+  .bottom-contact{
+    display: none;
+  }
+  .product-list-hot.grid-5 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Mobile siêu nhỏ (≤400px) */
+@media (max-width: 400px) {
+  body{
+    font-size: 16px;
+  }
+  .section {
+    padding: 1.5em 0.8em;
+  }
+  .about .about-description{
+    padding-bottom: 0px;
+  }
+  .services .services-item{
+    margin-bottom: 20px;
+  }
+  .header-contact{
+    display: none;
+  }
+  .header .header-main{
+    width: 100%;
+  }
+  .bottom-contact{
+    display: none;
+  }
+  .section .section-title{
+    font-size: 1.2rem;
+  }
+  .services .item-name{
+    font-size: .5rem;
+  }
+}
