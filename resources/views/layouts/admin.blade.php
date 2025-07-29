@@ -7,20 +7,19 @@
 
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-        <link rel="stylesheet" href="{{asset('vendor/fontawesome/css/all.min.css')}}">
-        <link rel="stylesheet" href="{{asset('vendor/adminLTE3/css/adminlte.min.css')}}">
-        <link rel="stylesheet" href="{{asset('vendor/bootstrap/css/bootstrap.min.css')}}">
-        <link rel="stylesheet" href="{{asset('vendor/bootstrap-icons/bootstrap-icons.min.css')}}">
-        <link href="{{ asset('vendor/filepond/filepond.min.css') }}" rel="stylesheet" />
-        <link href="{{ asset('vendor/filepond/plugins/filepond-plugin-image-preview.min.css') }}" rel="stylesheet" />
-        <link href="{{asset('plugins/summernote/summernote-bs4.min.css')}}" rel="stylesheet">
+        {{-- AdminLTE Assets --}}
+        <link rel="stylesheet" href="{{ asset('vendor/adminlte/plugins/fontawesome-free/css/all.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('vendor/adminlte/plugins/icheck-bootstrap/icheck-bootstrap.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('vendor/adminlte/dist/css/adminlte.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('vendor/bootstrap-icons/bootstrap-icons.min.css') }}">
+
         <link rel="stylesheet" href="{{asset('plugins/sweetalert2/bootstrap-4.min.css')}}">
         <link rel="stylesheet" href="{{asset('plugins/toastr/toastr.min.css')}}">
         <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
         <link rel="shortcut icon" href="/favicon/favicon.ico">
-        <link rel="manifest" href="/manifest.json">
+        {{-- <link rel="manifest" href="/manifest.json"> --}}
         @stack('css')
     </head>
     <body class="hold-transition sidebar-mini layout-fixed">
@@ -61,16 +60,10 @@
         </div>
 
         <script src="{{asset('js/jquery-3.7.1.min.js')}}"></script>
-        <script src="{{asset('vendor/adminLTE3/js/adminlte.min.js')}}"></script>
-        <script src="{{asset('/vendor/bootstrap/popper.min.js')}}?{{time()}}"></script>
-        <script src="{{asset('/vendor/bootstrap/js/bootstrap.bundle.min.js')}}?{{time()}}"></script>
-        <script src="{{asset('/vendor/bootstrap/js/bootstrap.min.js')}}?{{time()}}"></script>
-        <script src="{{asset('plugins/summernote/summernote-bs4.min.js')}}"></script>
-        <!-- JS -->
-        <script src="{{ asset('vendor/filepond/filepond.min.js') }}"></script>
-        <script src="{{ asset('vendor/filepond/plugins/filepond-plugin-file-validate-size.min.js') }}"></script>
-        <script src="{{ asset('vendor/filepond/plugins/filepond-plugin-file-validate-type.min.js') }}"></script>
-        <script src="{{ asset('vendor/filepond/plugins/filepond-plugin-image-preview.min.js') }}"></script>
+        {{-- AdminLTE Scripts --}}
+        <script src="{{ asset('vendor/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+        <script src="{{ asset('vendor/adminlte/dist/js/adminlte.min.js') }}"></script>
+
         <!-- toast and  sweetalert2 -->
         <script src="{{asset('plugins/toastr/toastr.min.js')}}"></script>
         <script src="{{asset('plugins/sweetalert2/sweetalert2.min.js')}}"></script>

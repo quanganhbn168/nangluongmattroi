@@ -4,7 +4,6 @@
     @foreach ($menu as $item)
         @php
             $hasSub = !empty($item['submenu']);
-            // SỬA LẠI: Gọi phương thức qua biến $component
             $isMenuActive = $hasSub ? $component->isOpen($item) : $component->isActive($item);
             $url = $hasSub ? '#' : (isset($item['route']) ? route($item['route'], $item['params'] ?? []) : '#');
         @endphp

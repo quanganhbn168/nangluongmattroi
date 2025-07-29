@@ -17,6 +17,8 @@ use App\Http\Controllers\TestimonialController;
 use App\Http\Controllers\ServiceCategoryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\BranchController;
+use App\Http\Controllers\BrandController;
+use App\Http\Controllers\TagController;
 
 // use App\Http\Controllers\ToggleController;
 
@@ -45,6 +47,13 @@ Route::middleware(['auth:admin'])->prefix('admin')->as('admin.')->group(function
     Route::resource('orders', OrderController::class)->only([
         'index', 'show', 'destroy'
     ]);
+
+    Route::resource('brands', BrandController::class)->except('show');
+    Route::get('ajax/brands', [BrandController::class, 'ajax'])->name('ajax.brands');
+
+    Route::resource('tags', TagController::class)->except('show');
+    Route::get('ajax/tags', [TagController::class, 'ajax'])->name('ajax.tags');
+    
     Route::post('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
     Route::resource('branches', BranchController::class);
 });

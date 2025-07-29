@@ -12,8 +12,8 @@ return [
         'submenu' => [
             [
                 'title' => 'Danh mục sản phẩm',
-                'route' => 'admin.categories.index', // Link chính
-                'active_pattern' => 'admin.categories.*', // Mẫu để kiểm tra active
+                'route' => 'admin.categories.index',
+                'active_pattern' => 'admin.categories.*',
                 'icon' => 'bi bi-folder2-open',
             ],
             [

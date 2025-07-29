@@ -6,11 +6,11 @@
     $previewId = 'preview_' . $name;
 @endphp
 
-<div class="form-group row">
-    <label for="{{ $inputId }}" class="col-sm-2 col-form-label">
+<div class="form-group">
+    <label for="{{ $inputId }}">
         {{ $label }} @if($required)<span class="text-danger">*</span>@endif
     </label>
-    <div class="col-sm-10">
+    
         <input
             type="file"
             name="{{ $name }}"
@@ -31,7 +31,7 @@
                 style="max-height: 150px; border: 1px solid #ddd; padding: 4px; background-color: #f8f8f8;"
             >
         </div>
-    </div>
+    
 </div>
 
 @push('js')
