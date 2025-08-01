@@ -22,8 +22,8 @@ class ProductController extends Controller
     public function create()
     {
         $categories = $this->productService->getCategoryOptions();
-        $attributes = Attribute::all();
-        return view('admin.products.create', compact('categories'));
+        $attribute = $this->productService->getAttribute()->toArray();
+        return view('admin.products.create', compact('categories','attribute'));
     }
 
     public function store(Request $request)
@@ -39,6 +39,12 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
+        $product->load([
+            'variants.attributeValues.attribute',
+            'category',
+            'brand',
+            'tags',
+        ]);
         $categories = $this->productService->getCategoryOptions();
         $images = Image::where('item_type','product')->where('item_id',$product->id)->pluck('image')->toArray();
         return view('admin.products.edit', compact('product', 'categories','images'));

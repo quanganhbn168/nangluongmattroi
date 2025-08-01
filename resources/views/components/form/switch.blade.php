@@ -6,9 +6,9 @@
     'offText' => 'Ẩn',
 ])
 
-<div class="form-group row">
-    <label for="{{ $name }}" class="col-sm-2 col-form-label">{{ $label }}</label>
-    <div class="col-sm-10">
+<div class="form-group">
+    <label for="{{ $name }}">{{ $label }}</label>
+    
         <div class="d-flex align-items-center gap-3">
             <div class="custom-control custom-switch">
                 <input type="hidden" name="{{ $name }}" value="0">
@@ -32,7 +32,7 @@
         @error($name)
             <div class="invalid-feedback d-block">{{ $message }}</div>
         @enderror
-    </div>
+    
 </div>
 
 @push('js')

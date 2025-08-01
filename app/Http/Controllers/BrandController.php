@@ -6,6 +6,7 @@ use App\Models\Brand;
 use App\Http\Requests\BrandRequest;
 use App\Services\BrandService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class BrandController extends Controller
 {
@@ -55,6 +56,19 @@ class BrandController extends Controller
 
     public function ajax(Request $request)
     {
+        if ($request->isMethod('post')) {
+            $brand = Brand::firstOrCreate(
+                ['name' => $request->name],
+                ['slug' => Str::slug($request->name)]
+            );
+
+            return response()->json([
+                'id' => $brand->id,
+                'text' => $brand->name,
+            ]);
+        }
+
         return $this->service->searchAjax($request->get('q', ''));
     }
+
 }

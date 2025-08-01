@@ -6,11 +6,10 @@
 @endphp
 
 
-<div class="form-group row">
-    <label for="{{ $name }}" class="col-sm-2 col-form-label">
+<div class="form-group">
+    <label for="{{ $name }}">
         {{ $label }} @if($required)<span class="text-danger">*</span>@endif
     </label>
-    <div class="col-sm-10">
         <select
             name="{{ $name }}"
             id="{{ $name }}"
@@ -24,5 +23,4 @@
         @error($name)
             <div class="invalid-feedback d-block">{{ $message }}</div>
         @enderror
-    </div>
 </div>

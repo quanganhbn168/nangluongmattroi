@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Pagination\LengthAwarePaginator;
-
+use App\Services\AttributeService;
 class ProductService
 {
     use UploadImageTrait;
@@ -18,9 +18,11 @@ class ProductService
     /**
      * @param ImageGalleryHandler $imageGallery
      */
-    public function __construct(protected ImageGalleryHandler $imageGallery)
-    {
-    }
+    public function __construct(
+        protected ImageGalleryHandler $imageGallery,
+        protected AttributeService $attributeService
+    )
+    {}
 
     /**
      * Lấy danh sách sản phẩm với phân trang.
@@ -40,7 +42,11 @@ class ProductService
      */
     public function getCategoryOptions(): array
     {
-        return Category::pluck('name', 'id')->toArray();
+        return Category::select('id', 'name', 'parent_id')->get()->toArray();
+    }
+    public function getAttribute()
+    {
+        return $this->attributeService->getAttributesWithValues(20);
     }
 
     /**
@@ -69,7 +75,19 @@ class ProductService
 
             // Đồng bộ thư viện ảnh
             $this->imageGallery->sync($product, $request, 'gallery', 'uploads/products/gallery');
+            if ($request->has('variants')) {
+                foreach ($request->input('variants') as $variantData) {
+                    $attributeIds = $variantData['attribute_value_ids'] ?? [];
 
+                    unset($variantData['attribute_value_ids']);
+
+                    $variant = $product->variants()->create($variantData);
+
+                    if ($attributeIds) {
+                        $variant->attributeValues()->sync($attributeIds);
+                    }
+                }
+            }
             return $product;
         });
     }
@@ -163,4 +181,26 @@ class ProductService
             'gallery.*'      => 'image|mimes:jpg,jpeg,png,webp|max:4096',
         ];
     }
+
+    public function syncVariants(Product $product, array $variants)
+    {
+        foreach ($variants as $variantData) {
+            $attributeValueIds = $variantData['attribute_value_ids'] ?? [];
+            unset($variantData['attribute_value_ids']);
+
+            $variant = $product->variants()->create([
+                'sku' => $variantData['sku'] ?? null,
+                'price' => $variantData['price'] ?? 0,
+                'original_price' => $variantData['original_price'] ?? 0,
+                'quantity' => $variantData['quantity'] ?? 0,
+                'is_default' => $variantData['is_default'] ?? false,
+            ]);
+
+            if (!empty($attributeValueIds)) {
+                $variant->attributeValues()->sync($attributeValueIds);
+            }
+        }
+    }
+
+
 }

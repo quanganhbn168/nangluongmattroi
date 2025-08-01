@@ -12,7 +12,8 @@
         <link rel="stylesheet" href="{{ asset('vendor/adminlte/plugins/icheck-bootstrap/icheck-bootstrap.min.css') }}">
         <link rel="stylesheet" href="{{ asset('vendor/adminlte/dist/css/adminlte.min.css') }}">
         <link rel="stylesheet" href="{{ asset('vendor/bootstrap-icons/bootstrap-icons.min.css') }}">
-
+        <link rel="stylesheet" href="{{ asset('vendor/adminlte/plugins/select2/css/select2.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('vendor/adminlte/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
         <link rel="stylesheet" href="{{asset('plugins/sweetalert2/bootstrap-4.min.css')}}">
         <link rel="stylesheet" href="{{asset('plugins/toastr/toastr.min.css')}}">
         <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
@@ -63,10 +64,13 @@
         {{-- AdminLTE Scripts --}}
         <script src="{{ asset('vendor/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
         <script src="{{ asset('vendor/adminlte/dist/js/adminlte.min.js') }}"></script>
-
+        <script src="//unpkg.com/alpinejs" defer></script>
         <!-- toast and  sweetalert2 -->
         <script src="{{asset('plugins/toastr/toastr.min.js')}}"></script>
         <script src="{{asset('plugins/sweetalert2/sweetalert2.min.js')}}"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+        <script src="{{ asset('vendor/adminlte/plugins/select2/js/select2.full.min.js') }}"></script>
+
         <script>
     const Toast = Swal.mixin({
         toast: true,
@@ -76,6 +80,25 @@
     });
 </script>
 
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.directive('sortable', (el, {expression}, {evaluate}) => {
+        let getItems = () => evaluate(expression);
+
+        new Sortable(el, {
+            animation: 150,
+            handle: '.handle',
+            onEnd: function (evt) {
+                if (evt.oldIndex === evt.newIndex) return;
+
+                let items = getItems();
+                const [moved] = items.splice(evt.oldIndex, 1);
+                items.splice(evt.newIndex, 0, moved);
+            }
+        });
+    });
+});
+</script>
 @if(session('success'))
     <script>
         Toast.fire({

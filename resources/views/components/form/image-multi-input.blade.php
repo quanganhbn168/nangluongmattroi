@@ -11,12 +11,11 @@
     $wrapperId = 'wrapper_' . $name;
 @endphp
 
-<div class="form-group row">
-    <label for="{{ $inputId }}" class="col-sm-2 col-form-label">
+<div class="form-group">
+    <label for="{{ $inputId }}">
         {{ $label }} @if($required)<span class="text-danger">*</span>@endif
     </label>
 
-    <div class="col-sm-10">
         {{-- Input upload ảnh mới --}}
         <input
             type="file"
@@ -43,7 +42,6 @@
                 </div>
             @endforeach
         </div>
-    </div>
 </div>
 
 @push('js')

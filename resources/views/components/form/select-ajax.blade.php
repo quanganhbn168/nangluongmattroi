@@ -30,8 +30,6 @@
 
 @once
     @push('css')
-        <link rel="stylesheet" href="{{ asset('vendor/adminlte/plugins/select2/css/select2.min.css') }}">
-        <link rel="stylesheet" href="{{ asset('vendor/adminlte/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
         <style>
             .select2-container--bootstrap4 .select2-selection--single,
             .select2-container--bootstrap4 .select2-selection--multiple {
@@ -43,7 +41,6 @@
     @endpush
 
     @push('js')
-        <script src="{{ asset('vendor/adminlte/plugins/select2/js/select2.full.min.js') }}"></script>
         <script>
             document.addEventListener("DOMContentLoaded", function () {
                 $('.select2-ajax').each(function () {
@@ -53,6 +50,25 @@
                         tags: true,
                         placeholder: el.data('placeholder'),
                         allowClear: true,
+                        createTag: function (params) {
+                            const term = $.trim(params.term);
+                            if (term === '') return null;
+                            return {
+                                id: term,
+                                text: term,
+                                newTag: true
+                            };
+                        },
+                        templateResult: function (data) {
+                            if (data.loading) return data.text;
+                            if (data.newTag) {
+                                return $('<span><i class="fas fa-plus text-white mr-1"></i> Thêm "<strong>' + data.text + '</strong>"</span>');
+                            }
+                            return data.text;
+                        },
+                        templateSelection: function (data) {
+                            return data.text;
+                        },
                         ajax: {
                             url: el.data('url'),
                             dataType: 'json',
@@ -68,6 +84,28 @@
                             noResults: () => 'Không có dữ liệu',
                             searching: () => 'Đang tìm...',
                         }
+                    });
+                    el.on('select2:select', function (e) {
+                        const selected = e.params.data;
+                        if (!selected.newTag) return;
+                        $.ajax({
+                            type: 'POST',
+                            url: el.data('url'), 
+                            data: {
+                                _token: '{{ csrf_token() }}',
+                                name: selected.text
+                            },
+                            success: function (res) {
+                                if (res.id) {
+                                    const newOption = new Option(res.text, res.id, true, true);
+                                    el.append(newOption).trigger('change');
+                                }
+                            },
+                            error: function () {
+                                alert('Không thể tạo mới. Vui lòng thử lại.');
+                                el.find("option[value='" + selected.id + "']").remove(); 
+                            }
+                        });
                     });
                 });
             });

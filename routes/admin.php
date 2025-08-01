@@ -19,6 +19,8 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\TagController;
+use App\Http\Controllers\AttributeController;
+use App\Http\Controllers\AttributeValueController;
 
 // use App\Http\Controllers\ToggleController;
 
@@ -49,11 +51,14 @@ Route::middleware(['auth:admin'])->prefix('admin')->as('admin.')->group(function
     ]);
 
     Route::resource('brands', BrandController::class)->except('show');
-    Route::get('ajax/brands', [BrandController::class, 'ajax'])->name('ajax.brands');
+    Route::match(['get', 'post'], 'ajax/brands', [BrandController::class, 'ajax'])->name('ajax.brands');
 
     Route::resource('tags', TagController::class)->except('show');
     Route::get('ajax/tags', [TagController::class, 'ajax'])->name('ajax.tags');
     
+    Route::match(['get', 'post'], 'ajax/attributes', [AttributeController::class, 'ajax'])->name('ajax.attributes');
+    Route::match(['get', 'post'], 'ajax/attribute-values', [AttributeValueController::class, 'ajax'])->name('ajax.attribute-values');
+
     Route::post('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
     Route::resource('branches', BranchController::class);
 });
