@@ -10,13 +10,13 @@ trait HasImageGallery
     public function images()
     {
         return $this->hasMany(Image::class, 'item_id')
-            ->where('type', static::class);
+            ->where('item_type', static::class);
     }
 
     public function addImage(string $imagePath): void
     {
         Image::create([
-            'type' => static::class,
+            'item_type' => static::class,
             'item_id' => $this->id,
             'image' => $imagePath,
         ]);
@@ -24,7 +24,7 @@ trait HasImageGallery
 
     public function clearImages(): void
     {
-        Image::where('type', static::class)
+        Image::where('item_type', static::class)
             ->where('item_id', $this->id)
             ->delete();
     }

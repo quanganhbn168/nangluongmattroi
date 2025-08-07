@@ -5,45 +5,34 @@ namespace App\Services;
 use App\Handlers\ImageGalleryHandler;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\AttributeValue;
+use App\Models\ProductVariant;
 use App\Traits\UploadImageTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Services\AttributeService;
+
 class ProductService
 {
     use UploadImageTrait;
 
-    /**
-     * @param ImageGalleryHandler $imageGallery
-     */
     public function __construct(
         protected ImageGalleryHandler $imageGallery,
         protected AttributeService $attributeService
-    )
-    {}
+    ) {}
 
-    /**
-     * Lấy danh sách sản phẩm với phân trang.
-     * Eager load 'category' để tránh vấn đề N+1 query.
-     *
-     * @return LengthAwarePaginator
-     */
     public function getAll(): LengthAwarePaginator
     {
         return Product::with('category')->latest()->paginate(20);
     }
 
-    /**
-     * Lấy danh sách các danh mục để hiển thị trong form (ví dụ: thẻ <select>).
-     *
-     * @return array
-     */
     public function getCategoryOptions(): array
     {
         return Category::select('id', 'name', 'parent_id')->get()->toArray();
     }
+
     public function getAttribute()
     {
         return $this->attributeService->getAttributesWithValues(20);
@@ -56,38 +45,43 @@ class ProductService
      * @return Product
      * @throws \Throwable
      */
-    public function create(Request $request): Product
+    public function store(Request $request): Product
     {
-        $data = $request->validate($this->getValidationRules());
+        // Lấy dữ liệu đã được validate từ request
+        $data = $request->validated();
 
         return DB::transaction(function () use ($request, $data) {
-            $data['slug'] ??= Str::slug($data['name']);
-
+            if (empty($data['slug'])) {
+                $data['slug'] = Str::slug($data['name']);
+            }
+            
+            // Xử lý upload ảnh từ file trong request
             if ($request->hasFile('image')) {
-                $data['image'] = $this->uploadImage($request->file('image'), 'uploads/products', 800, true);
+                $data['image'] = $this->uploadImage($request->file('image'), 'uploads/products', 800, 800, true);
             }
-
             if ($request->hasFile('banner')) {
-                $data['banner'] = $this->uploadImage($request->file('banner'), 'uploads/products', 1920, true);
+                $data['banner'] = $this->uploadImage($request->file('banner'), 'uploads/products', 1920, 600, true);
             }
 
+            $variantData = $data['variants'] ?? [];
+            unset($data['variants']);
+            
             $product = Product::create($data);
-
-            // Đồng bộ thư viện ảnh
+            
+            // SỬA Ở ĐÂY: Truyền thẳng $request cho ImageGalleryHandler
             $this->imageGallery->sync($product, $request, 'gallery', 'uploads/products/gallery');
-            if ($request->has('variants')) {
-                foreach ($request->input('variants') as $variantData) {
-                    $attributeIds = $variantData['attribute_value_ids'] ?? [];
 
-                    unset($variantData['attribute_value_ids']);
-
-                    $variant = $product->variants()->create($variantData);
-
-                    if ($attributeIds) {
-                        $variant->attributeValues()->sync($attributeIds);
-                    }
-                }
+            if (isset($data['has_variants']) && $data['has_variants'] && !empty($variantData)) {
+                $this->syncVariants($product, $variantData);
+            } else {
+                $product->variants()->create([
+                    'price' => $data['price_discount'] ?? 0,
+                    'original_price' => $data['price'] ?? 0,
+                    'stock' => $data['stock'] ?? 0,
+                    'is_default' => true,
+                ]);
             }
+
             return $product;
         });
     }
@@ -102,105 +96,140 @@ class ProductService
      */
     public function update(Request $request, Product $product): Product
     {
-        $data = $request->validate($this->getValidationRules($product));
+        // Lấy dữ liệu đã được validate từ request
+        $data = $request->validated();
 
-        return DB::transaction(function () use ($request, $product, $data) {
+        return DB::transaction(function () use ($request, $data, $product) {
             $data['slug'] ??= Str::slug($data['name']);
 
             if ($request->hasFile('image')) {
-                $this->deleteImage($product->image); // Xóa ảnh cũ
-                $data['image'] = $this->uploadImage($request->file('image'), 'uploads/products', 800, true);
+                $this->deleteImage($product->image);
+                $data['image'] = $this->uploadImage($request->file('image'), 'uploads/products', 800, 800, true);
             }
 
             if ($request->hasFile('banner')) {
-                $this->deleteImage($product->banner); // Xóa banner cũ
+                $this->deleteImage($product->banner);
                 $data['banner'] = $this->uploadImage($request->file('banner'), 'uploads/products', 1920, true);
             }
+            
+            $variantData = $data['variants'] ?? [];
+            unset($data['variants']);
 
             $product->update($data);
 
-            // Đồng bộ thư viện ảnh
+            // SỬA Ở ĐÂY: Truyền thẳng $request cho ImageGalleryHandler
             $this->imageGallery->sync($product, $request, 'gallery', 'uploads/products/gallery');
+
+            if (isset($data['has_variants']) && $data['has_variants']) {
+                if (!empty($variantData)) {
+                    $this->syncVariants($product, $variantData);
+                }
+            } else {
+                $product->variants()->delete();
+                $product->variants()->create([
+                    'price' => $data['price_discount'] ?? 0,
+                    'original_price' => $data['price'] ?? 0,
+                    'stock' => $data['stock'] ?? 0,
+                    'is_default' => true,
+                ]);
+            }
 
             return $product;
         });
     }
-
-    /**
-     * Xóa một sản phẩm.
-     * Bao gồm cả việc xóa các file ảnh và thư viện ảnh liên quan.
-     *
-     * @param Product $product
-     * @return void
-     * @throws \Throwable
-     */
+    
     public function delete(Product $product): void
     {
         DB::transaction(function () use ($product) {
             $this->deleteImage($product->image);
             $this->deleteImage($product->banner);
-            
-            // Xóa tất cả ảnh trong thư viện của sản phẩm
             $this->imageGallery->deleteAll($product);
-
             $product->delete();
         });
     }
 
-    /**
-     * Lấy các quy tắc xác thực cho việc tạo và cập nhật sản phẩm.
+/**
+     * Hàm lõi để đồng bộ (tạo, cập nhật, xóa) các biến thể.
      *
-     * @param Product|null $product
-     * @return array
+     * @param Product $product
+     * @param array $variantsData
      */
-    private function getValidationRules(?Product $product = null): array
+    public function syncVariants(Product $product, array $variantsData)
     {
-        // Nếu là cập nhật, slug phải là duy nhất ngoại trừ chính sản phẩm đó.
-        $slugRule = 'nullable|string|max:255|unique:products,slug';
-        if ($product) {
-            $slugRule .= ',' . $product->id;
-        }
+        foreach ($variantsData as $variantKey => $variantData) {
+            if (isset($variantData['_delete']) && $variantData['_delete'] == '1') {
+                if (isset($variantData['id'])) {
+                    $product->variants()->where('id', $variantData['id'])->delete();
+                }
+                continue;
+            }
 
-        return [
-            'category_id'    => 'required|exists:categories,id',
-            'name'           => 'required|string|max:255',
-            'slug'           => $slugRule,
-            'price'          => 'nullable|numeric|min:0',
-            'price_discount' => 'nullable|numeric|min:0',
-            'description'    => 'nullable|string',
-            'code'           => 'required|string|max:255',
-            'content'        => 'nullable|string',
-            'specifications' => 'nullable|string',
-            'image'          => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'banner'         => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
-            'status'         => 'boolean',
-            'is_home'        => 'boolean',
-            'sm'             => 'nullable|string',
-            'll'             => 'nullable|string',
-            'gallery'        => 'nullable|array',
-            'gallery.*'      => 'image|mimes:jpg,jpeg,png,webp|max:4096',
-        ];
-    }
+            // === PHẦN LOGIC TỰ ĐỘNG TẠO SKU ===
+            // Nếu người dùng không nhập SKU, chúng ta tự tạo
+            if (empty($variantData['sku'])) {
+                $valueNames = [];
+                // Lấy ra mảng tên các giá trị thuộc tính, ví dụ: ['Đỏ', 'S']
+                if (!empty($variantData['attributes'])) {
+                    foreach ($variantData['attributes'] as $attributeId => $valueName) {
+                        $valueNames[] = $valueName;
+                    }
+                }
+                // Gọi hàm trợ giúp để tạo SKU duy nhất
+                $variantData['sku'] = $this->generateUniqueSku($product->code, $valueNames);
+            }
+            // ===================================
 
-    public function syncVariants(Product $product, array $variants)
-    {
-        foreach ($variants as $variantData) {
-            $attributeValueIds = $variantData['attribute_value_ids'] ?? [];
-            unset($variantData['attribute_value_ids']);
+            $variant = $product->variants()->updateOrCreate(
+                ['id' => $variantData['id'] ?? null],
+                [
+                    'sku' => $variantData['sku'], // SKU bây giờ luôn có giá trị
+                    'price' => $variantData['price'] ?? 0,
+                    'stock' => $variantData['stock'] ?? 0,
+                ]
+            );
 
-            $variant = $product->variants()->create([
-                'sku' => $variantData['sku'] ?? null,
-                'price' => $variantData['price'] ?? 0,
-                'original_price' => $variantData['original_price'] ?? 0,
-                'quantity' => $variantData['quantity'] ?? 0,
-                'is_default' => $variantData['is_default'] ?? false,
-            ]);
+            $valueIds = [];
+            if (!empty($variantData['attributes'])) {
+                foreach ($variantData['attributes'] as $attributeId => $valueName) {
+                    $attributeValue = AttributeValue::firstOrCreate(
+                        ['attribute_id' => $attributeId, 'value' => trim($valueName)]
+                    );
+                    $valueIds[] = $attributeValue->id;
+                }
+            }
 
-            if (!empty($attributeValueIds)) {
-                $variant->attributeValues()->sync($attributeValueIds);
+            if (!empty($valueIds)) {
+                $variant->attributeValues()->sync($valueIds);
             }
         }
     }
 
+    /**
+     * Hàm trợ giúp để tạo một SKU duy nhất.
+     *
+     * @param string $productCode Mã sản phẩm cha
+     * @param array $valueNames Mảng các tên giá trị, ví dụ: ['Đỏ', 'S']
+     * @return string SKU duy nhất
+     */
+    private function generateUniqueSku(string $productCode, array $valueNames): string
+    {
+        // 1. Tạo SKU cơ bản
+        $suffix = collect($valueNames)->map(fn($value) => Str::slug($value))->implode('-');
+        $baseSku = Str::upper($productCode . ($suffix ? '-' . $suffix : ''));
 
+        // 2. Kiểm tra xem SKU đã tồn tại chưa
+        if (!ProductVariant::where('sku', $baseSku)->exists()) {
+            return $baseSku;
+        }
+
+        // 3. Nếu đã tồn tại, thêm số vào cuối và kiểm tra lại cho đến khi duy nhất
+        $counter = 2;
+        while (true) {
+            $newSku = "{$baseSku}-{$counter}";
+            if (!ProductVariant::where('sku', $newSku)->exists()) {
+                return $newSku;
+            }
+            $counter++;
+        }
+    }
 }

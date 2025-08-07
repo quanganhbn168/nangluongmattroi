@@ -1,89 +1,52 @@
-/* Tablet ngang (≤1200px) */
-@media (max-width: 1200px) {
-  body{
-    font-size: 16px;
-    margin-bottom: 8px;
-  }
-  .section {
-    padding: 4em 2em;
-  }
-  .header .header-main{
-    width: 100%;
-  }
+@media (max-width: 1199.98px) {
+    .product-widget_wrapper {
+        grid-template-columns: repeat(4, 1fr);
+    }
 }
-
-/* Tablet dọc (≤992px) */
-@media (max-width: 992px) {
-  body{
-    font-size: 16px;
-  }
-  .section {
-    padding: 3em 1.5em;
-  }
-  .product-list-hot.grid-5 {
+@media (max-width: 991.98px) {
+    .product-widget_wrapper {
         grid-template-columns: repeat(3, 1fr);
     }
 }
-
-/* Mobile lớn (≤768px) */
-@media (max-width: 768px) {
-  body{
-    font-size: 16px;
-  }
-  .section {
-    padding: 2.5em 1.2em;
-  }
-  .product-list-hot.grid-5 {
+@media (max-width: 767.98px) {
+    body {
+        padding-bottom: 70px;
+    }
+    .product-widget_wrapper {
         grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+    .product-item_info h3 {
+        font-size: 15px;
+        height: 45px;
+    }
+    .news .section-title {
+        flex-direction: column; 
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .news .col-md-6:last-child {
+        margin-top: 25px; 
+    }
+    .big-news h3 a {
+        font-size: 18px; 
+    }
+    .feature-item {
+        margin-bottom: 24px; 
+    }
+    .feature .col-6:nth-last-child(-n+2) .feature-item {
+        margin-bottom: 0;
+    }
+    .bottom-contact {
+        display: none;
+    }
+    .product-widget_wrapper {
+        gap: 15px;
     }
 }
-
-/* Mobile phổ thông (≤576px) */
-@media (max-width: 576px) {
-  body{
-    font-size: 16px;
-  }
-  .section {
-    padding: 2em 1em;
-  }
-  .header-contact{
-    display: none;
-  }
-  .bottom-contact{
-    display: none;
-  }
-  .product-list-hot.grid-5 {
-        grid-template-columns: 1fr;
+@media (max-width: 575.98px) {
+    .item_list-img a {
+        width: 80px;
+        height: 65px;
     }
-}
-
-/* Mobile siêu nhỏ (≤400px) */
-@media (max-width: 400px) {
-  body{
-    font-size: 16px;
-  }
-  .section {
-    padding: 1.5em 0.8em;
-  }
-  .about .about-description{
-    padding-bottom: 0px;
-  }
-  .services .services-item{
-    margin-bottom: 20px;
-  }
-  .header-contact{
-    display: none;
-  }
-  .header .header-main{
-    width: 100%;
-  }
-  .bottom-contact{
-    display: none;
-  }
-  .section .section-title{
-    font-size: 1.2rem;
-  }
-  .services .item-name{
-    font-size: .5rem;
-  }
 }

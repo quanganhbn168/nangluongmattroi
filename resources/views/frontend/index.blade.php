@@ -9,7 +9,7 @@
   "@type": "Store",
   "name": "{{$setting->name}}",
   "alternateName": "{{$setting->name}}",
-  "url": "{{config(APP_URL)}}",
+  "url": "{{ url()->current() }}",
   "logo": "{{asset($setting->logo)}}",
   "description": "{{$setting->meta_description}}",
   "address": {
@@ -55,127 +55,409 @@
 @endpush
 @section("content")
 <section id="slider">
-    @include("partials.frontend.slide")
-</section>
-<p>DANH MỤC SẢN PHẨM</p>
-<section class="section sanphamnoibat">
-    <div class="container">
-        <p class="text-uppercase">Gợi ý cho bạn</p>
-        <p>Chào mừng bạn! Có thể bạn sẽ thích sản phẩm này</p>
-        <div class="sanphamnoibat-list">
-            <div class="swiper-container sanphamnoibat-slider">
-                <div class="swiper-wrapper">
-                    @foreach($randomProducts as $key => $product)
-                    <div class="swiper-slider">
-                        @include('partials.frontend.product_item',['product'=>$product])
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-<section class="section product-list">
-    <div class="container">
-        <h2 class="section-title">
-            <span>Sản phẩm bán chạy</span>
-        </h2>
-        <div class="product-list_hot grid-5">
-            @foreach($hotProducts as $key => $product)
-                @include('partials.frontend.product',['product'=>$product])
-            @endforeach
-            <div class="text-center">
-                <a href="#" class="btn btn-primary">Xem thêm</a>
-            </div>
-        </div>
-    </div>
-</section>
-<section class="section category-list">
-    @foreach($homeCategory as $key => $category)
-    <div class="container">
-        <div class="category-banenr">
-            <img src="{{asset($category->banner)}}" alt="{{$category->name}}">
-        </div>
-        <div class="category-list_product">
-            <div class="section-title">
-                <h2 class="name-category">{{$category->name}}</h2>
-                <a href="#" class="see-more">Xem thêm</a>
-            </div>
-            <div class="list_product-wrapper grid-5">
-                @foreach($category->product()->where('status',1) as $key => $product)
-                    @include('partials.frontend.product',['product'=>$product])
-                @endforeach
-            </div>
-        </div>
-    </div>
-    @endforeach
-</section>
-<section class="section dichvu">
-    <h2 class="section-title">Dịch vụ chúng tôi cung cấp</h2>
-    <div class="container">
-        
-    </div>
-</section>
-<section class="section nhungconso">
     <div class="container">
         <div class="row">
-            <div class="col-12 col-md-12 text-center">
-                <h3>NHỮNG CON SỐ KHẲNG ĐỊNH CHẤT LƯỢNG</h3>
-                <p>Mỗi dự án là một dấu ấn, mỗi đơn hàng là minh chứng cho sự tin tưởng và đồng hành của khách hàng. Mỗi sản phẩm gửi đi là tâm huyết của Masu Việt Nam.</p>
-
-<p>Đây là những con số nổi bật sau hơn 1 năm ra nhập thị trường của MASU</p>
-<div class="text-center"></div>
-<div class="counter">
-    <ul>
-        <li>
-            <p class="counter-number" data-target="500">0</p>
-            <p>Đơn hàng</p>
-        </li>
-        <li>
-            <p class="counter-number" data-target="3000">0</p>
-            <p>Sản phẩm đã bán</p>
-        </li>
-        <li>
-            <p class="counter-number" data-target="70">0</p>
-            <p>Đại lý phân phối</p>
-        </li>
-        <li>
-            <p class="counter-number" data-target="98" data-suffix="%">0%</p>
-            <p>Phản hồi tích cực</p>
-        </li>
-    </ul>
-</div>
-
+            <div class="col-lg-8 col-12">
+                @include("partials.frontend.slide")
+            </div>
+            <div class="col-lg-4 col-12">
+                <div class="banner-home p-2 mb-2">
+                    <img src="https://placehold.co/500x250" alt="">
+                </div>
+                <div class="banner-home p-2 mb-2">
+                    <img src="https://placehold.co/500x250" alt="">
+                </div>
+                
             </div>
         </div>
     </div>
 </section>
-<section class="section tintuc">
-    @foreach($serviceCategoryHome as $key => $category)
-        <div class="tintuc-top">
-            <h2 class="tintuc-title">{{$category->name}}</h2>
-            <a href="" class="">Xem thêm <i class="fa-solid fa-angles-right"></i></a>
-        </div>
-        <div class="tintuc-wrapper">
-            @foreach($category->post()->where('status',1)->get() as $key => $post)
-            <div class="tintuc-item">
-                <div class="card">
-                    <div class="card-body">
-                        <a href="{{route('slug.resolve',$post->slug)}}">
-                            <img src="{{asset($post->image)}}" alt="{{$post->name}}">
-                        </a>
+<section class="feature">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3 col-6">
+                <div class="feature-item">
+                    <div class="text-center">
+                        <i class="fa-solid fa-piggy-bank"></i>
                     </div>
-                    <div class="card-footer">
-                        <a href="{{route('slug.resolve',$post->slug)}}">
-                            {{$post->name}}
-                        </a>
+                    <h3 class="">Tiết kiệm tối đa</h3>
+                    <p class="text-gray-600">Giảm đến 90% chi phí tiền điện hàng tháng, hoàn vốn nhanh chóng chỉ từ 4-5 năm.</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="feature-item">
+                    <div class="text-center">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3 class="">Sản Phẩm Chính Hãng</h3>
+                    <p class="text-gray-600">Giảm đến 90% chi phí tiền điện hàng tháng, hoàn vốn nhanh chóng chỉ từ 4-5 năm.</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="feature-item">
+                    <div class="text-center">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="">Bảo Hành Dài Hạn</h3>
+                    <p class="text-gray-600">Chính sách bảo hành hiệu suất 25 năm, bảo hành vật lý 12 năm, đảm bảo an tâm tuyệt đối.</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="feature-item">
+                    <div class="text-center">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3 class="">Chính sách rõ ràng</h3>
+                    <p class="text-gray-600">Giảm đến 90% chi phí tiền điện hàng tháng, hoàn vốn nhanh chóng chỉ từ 4-5 năm.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="categories">
+    <div class="container">
+        <div class="section-title">
+            <h3>
+                <a href="#" class="text-uppercase">Danh Mục Sản Phẩm Chính</a>
+            </h3>
+        </div>
+        <div class="categories-wrapper">
+            <div class="row">
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="categories-item">
+                        <div class="categories-item_image">
+                            <img src="https://placehold.co/300x300/005a9c/FFFFFF?text=Tấm+Pin" alt="Tấm Pin Năng Lượng Mặt Trời">
+                        </div>
+                        <div class="categories-item_name">
+                            <a href="#">Tấm Pin Mặt Trời</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="categories-item">
+                        <div class="categories-item_image">
+                            <img src="https://placehold.co/300x300/ffc107/333333?text=Inverter" alt="Biến tần (Inverter)">
+                        </div>
+                        <div class="categories-item_name">
+                            <a href="#">Biến Tần (Inverter)</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="categories-item">
+                        <div class="categories-item_image">
+                            <img src="https://placehold.co/300x300/005a9c/FFFFFF?text=Pin+Lưu+Trữ" alt="Pin Lưu Trữ">
+                        </div>
+                        <div class="categories-item_name">
+                            <a href="#">Pin Lưu Trữ (Hybrid)</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="categories-item">
+                        <div class="categories-item_image">
+                            <img src="https://placehold.co/300x300/ffc107/333333?text=Phụ+Kiện" alt="Phụ kiện lắp đặt">
+                        </div>
+                        <div class="categories-item_name">
+                            <a href="#">Phụ Kiện Lắp Đặt</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="categories-item">
+                        <div class="categories-item_image">
+                            <img src="https://placehold.co/300x300/005a9c/FFFFFF?text=Đèn+NLMT" alt="Đèn năng lượng mặt trời">
+                        </div>
+                        <div class="categories-item_name">
+                            <a href="#">Đèn Năng Lượng Mặt Trời</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="categories-item">
+                        <div class="categories-item_image">
+                            <img src="https://placehold.co/300x300/ffc107/333333?text=Hệ+Thống+Bơm" alt="Hệ thống bơm NLMT">
+                        </div>
+                        <div class="categories-item_name">
+                            <a href="#">Hệ Thống Bơm NLMT</a>
+                        </div>
                     </div>
                 </div>
             </div>
-            @endforeach
         </div>
-    @endforeach
-</section>           
+    </div>
+</section>
+<section class="product-list">
+    <div class="container">
+        <div class="product-widget">
+            <div class="widget-title">
+                <h3>
+                    <a href="">Tấm pin năng lượng mặt trời</a>
+                </h3>
+                <div class="widget-tool">
+                    <a href="">Xem thêm <i class="fa-solid fa-angles-right"></i></a>
+                </div>
+            </div>
+            <div class="product-widget_wrapper">
+                <div class="product-item">
+                    <div class="product-item_image">
+                        <a href="">
+                            <img src="https://placehold.co/400" alt="">
+                        </a>
+                    </div>
+                    <div class="product-item_info">
+                        <h3><a href="">Tấm pin năng lượng mặt trời</a></h3>
+                        <span class="price text-danger text-bold">Gọi để biết giá</span>
+                    </div>
+                </div>
+                <div class="product-item">
+                    <div class="product-item_image">
+                        <a href="">
+                            <img src="https://placehold.co/400" alt="">
+                        </a>
+                    </div>
+                    <div class="product-item_info">
+                        <h3><a href="">Tấm pin năng lượng mặt trời</a></h3>
+                        <span class="price text-danger text-bold">Gọi để biết giá</span>
+                    </div>
+                </div>
+                <div class="product-item">
+                    <div class="product-item_image">
+                        <a href="">
+                            <img src="https://placehold.co/400" alt="">
+                        </a>
+                    </div>
+                    <div class="product-item_info">
+                        <h3><a href="">Tấm pin năng lượng mặt trời</a></h3>
+                        <span class="price text-danger text-bold">Gọi để biết giá</span>
+                    </div>
+                </div>
+                <div class="product-item">
+                    <div class="product-item_image">
+                        <a href="">
+                            <img src="https://placehold.co/400" alt="">
+                        </a>
+                    </div>
+                    <div class="product-item_info">
+                        <h3><a href="">Tấm pin năng lượng mặt trời</a></h3>
+                        <span class="price text-danger text-bold">Gọi để biết giá</span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</section>
+<section class="product-list">
+    <div class="container">
+        <div class="product-widget">
+            <div class="widget-title">
+                <h3>
+                    <a href="">Bộ lưu trữ năng lượng mặt trời</a>
+                </h3>
+                <div class="widget-tool">
+                    <a href="">Xem thêm <i class="fa-solid fa-angles-right"></i></a>
+                </div>
+            </div>
+            <div class="product-widget_wrapper">
+                <div class="product-item">
+                    <div class="product-item_image">
+                        <a href="">
+                            <img src="https://placehold.co/400" alt="">
+                        </a>
+                    </div>
+                    <div class="product-item_info">
+                        <h3><a href="">Tấm pin năng lượng mặt trời</a></h3>
+                        <span class="price text-danger text-bold">Gọi để biết giá</span>
+                    </div>
+                </div>
+                <div class="product-item">
+                    <div class="product-item_image">
+                        <a href="">
+                            <img src="https://placehold.co/400" alt="">
+                        </a>
+                    </div>
+                    <div class="product-item_info">
+                        <h3><a href="">Tấm pin năng lượng mặt trời</a></h3>
+                        <span class="price text-danger text-bold">Gọi để biết giá</span>
+                    </div>
+                </div>
+                <div class="product-item">
+                    <div class="product-item_image">
+                        <a href="">
+                            <img src="https://placehold.co/400" alt="">
+                        </a>
+                    </div>
+                    <div class="product-item_info">
+                        <h3><a href="">Tấm pin năng lượng mặt trời</a></h3>
+                        <span class="price text-danger text-bold">Gọi để biết giá</span>
+                    </div>
+                </div>
+                <div class="product-item">
+                    <div class="product-item_image">
+                        <a href="">
+                            <img src="https://placehold.co/400" alt="">
+                        </a>
+                    </div>
+                    <div class="product-item_info">
+                        <h3><a href="">Tấm pin năng lượng mặt trời</a></h3>
+                        <span class="price text-danger text-bold">Gọi để biết giá</span>
+                    </div>
+                </div>
+                <div class="product-item">
+                    <div class="product-item_image">
+                        <a href="">
+                            <img src="https://placehold.co/400" alt="">
+                        </a>
+                    </div>
+                    <div class="product-item_info">
+                        <h3><a href="">Tấm pin năng lượng mặt trời</a></h3>
+                        <span class="price text-danger text-bold">Gọi để biết giá</span>
+                    </div>
+                </div>
+                <div class="product-item">
+                    <div class="product-item_image">
+                        <a href="">
+                            <img src="https://placehold.co/400" alt="">
+                        </a>
+                    </div>
+                    <div class="product-item_info">
+                        <h3><a href="">Tấm pin năng lượng mặt trời</a></h3>
+                        <span class="price text-danger text-bold">Gọi để biết giá</span>
+                    </div>
+                </div>
+                
+                <div class="product-item">
+                    <div class="product-item_image">
+                        <a href="">
+                            <img src="https://placehold.co/400" alt="">
+                        </a>
+                    </div>
+                    <div class="product-item_info">
+                        <h3><a href="">Tấm pin năng lượng mặt trời</a></h3>
+                        <span class="price text-danger text-bold">Gọi để biết giá</span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</section>
+<section class="news">
+    <div class="container">
+        <h2 class="section-title">
+            <a href="">Tin tức</a>
+            <div class="section-tool">
+                <a href="">Xem thêm <i class="fa-solid fa-angles-right"></i></a>
+            </div>
+        </h2>
+            <div class="row">
+                <div class="col-12 col-md-6">
+                    <div class="big-news">
+                        <div class="big-news-image">
+                            <img src="https://placehold.co/400" alt="">
+                        </div>
+                        <h3>
+                            <a href="">Tin mới nhất</a>
+                        </h3>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="news-item_list">
+                        <div class="item_list-img">
+                            <a href="">
+                                <img src="https://placehold.co/400" alt="" width="80" height="80">
+                            </a>
+                        </div>
+                        <div class="item_list-info">
+                            <a href="">Tin tức 1</a>
+                        </div>
+                    </div>
+                    <div class="news-item_list">
+                        <div class="item_list-img">
+                            <a href="">
+                                <img src="https://placehold.co/400" alt="" width="80" height="80">
+                            </a>
+                        </div>
+                        <div class="item_list-info">
+                            <a href="">Tin tức 1</a>
+                        </div>
+                    </div>
+                    <div class="news-item_list">
+                        <div class="item_list-img">
+                            <a href="">
+                                <img src="https://placehold.co/400" alt="" width="80" height="80">
+                            </a>
+                        </div>
+                        <div class="item_list-info">
+                            <a href="">Tin tức 1</a>
+                        </div>
+                    </div>
+                    <div class="news-item_list">
+                        <div class="item_list-img">
+                            <a href="">
+                                <img src="https://placehold.co/400" alt="" width="80" height="80">
+                            </a>
+                        </div>
+                        <div class="item_list-info">
+                            <a href="">Tin tức 1</a>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+    </div>
+</section>
+<section id="contact" class="py-3">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 col-md-6 box-shadow bg-light mb-4">
+                <h2 class="section-title text-dark text-center my-4">Liên hệ với chúng tôi</h2>
+                <form id="contact-form" action="{{ route('contact.store') }}" method="POST" novalidate>
+                    @csrf
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="name">Họ và tên <span class="text-danger">*</span></label>
+                            <input type="text" name="name" id="name" class="form-control" required>
+                        </div>
+
+                        <div class="form-group col-md-6">
+                            <label for="phone">Số điện thoại <span class="text-danger">*</span></label>
+                            <input type="text" name="phone" id="phone" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email (không bắt buộc)</label>
+                        <input type="email" name="email" id="email" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">Nội dung liên hệ</label>
+                        <textarea name="message" id="message" rows="5" class="form-control" value="Tôi đang quan tâm đến sản phẩm"></textarea>
+                    </div>
+
+                    <div class="text-center mb-3">
+                        <button type="submit" class="btn btn-dark">Gọi cho tôi</button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-6 d-none d-md-block">
+                <div class="contact-info__image">
+                    <img src="{{asset($setting->logo)}}" alt="{{$setting->name}}">
+                    <p class="">{{$setting->name}}</p>
+                </div>
+                <p class="contact-info__text">
+                    Năng lượng mặt trời Tài Nguyễn
+                </p>
+                <div class="contact-info__button">
+                    <a href="" class="w-100 btn btn-light rounded-pill d-block mb-3">{{$setting->phone}}</a>
+                    <a href="" class="w-100 btn btn-dark rounded-pill d-block mb-3">Chat ngay</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>      
 @endsection
 @push('js')
 <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
@@ -197,7 +479,7 @@
                     email: {
                         email: true
                     },
-                    content: {
+                    message: {
                         maxlength: 1000
                     }
                 },
@@ -256,7 +538,7 @@
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     runCounter(entry.target);
-                observer.unobserve(entry.target); // chỉ chạy 1 lần
+                observer.unobserve(entry.target);
             }
         });
         }, {
@@ -266,154 +548,4 @@
         counters.forEach(counter => observer.observe(counter));
     });
 </script>
-
-<script>
-const partnerSwiper = new Swiper('.partner-swiper', {
-    slidesPerView: 4,
-    centeredSlides: true,
-    spaceBetween: 30,
-    loop: true,
-    autoplay: {
-                delay: 2500,
-                disableOnInteraction: false,
-            },
-    navigation: {
-        nextEl: '.swiper-button-next',
-        prevEl: '.swiper-button-prev',
-    },
-    breakpoints: {
-        768: {
-            slidesPerView: 3,
-        }
-    }
-});
-</script>
-<script>
-const best = new Swiper('.sanphamnoibat-slider', {
-    slidesPerView: 5,
-    spaceBetween: 20,
-    loop: true,
-    autoplay: {
-        delay: 2000,
-        disableOnInteraction: false,
-    },
-    navigation: {
-        nextEl: '.swiper-button-next',
-        prevEl: '.swiper-button-prev',
-    },
-    breakpoints: {
-        0: {
-            slidesPerView: 1,
-        },
-        576: {
-            slidesPerView: 2,
-        },
-        768: {
-            slidesPerView: 3,
-        },
-        992: {
-            slidesPerView: 5,
-        },
-    }
-});
-</script>
-<script>
-    const slider = new Swiper('.slider', {
-        slidesPerView: 1,
-        centeredSlides: true,
-        spaceBetween: 20,
-        loop: true,
-        navigation: {
-            nextEl: '.swiper-button-next',
-            prevEl: '.swiper-button-prev',
-        },
-        autoplay: {
-            delay: 3000, // thời gian chuyển slide, tính bằng ms (3000 = 3 giây)
-            disableOnInteraction: false // vẫn tiếp tục autoplay sau khi người dùng tương tác
-        },
-        breakpoints: {
-            768: {
-                slidesPerView: 1,
-            }
-        }
-    });
-</script>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        new Swiper('.testimonial-swiper', {
-            loop: true,
-            autoplay: {
-                delay: 5000,
-                disableOnInteraction: false,
-            },
-            spaceBetween: 20,
-            navigation: {
-                nextEl: '.swiper-button-next',
-                prevEl: '.swiper-button-prev',
-            },
-            breakpoints: {
-                768: {
-                    slidesPerView: 2,
-                },
-                992: {
-                    slidesPerView: 3,
-                },
-                576: {
-                    slidesPerView: 1,
-                },
-            }
-        });
-    });
-</script>
-<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
-        <script>
-    // Custom rule kiểm tra số điện thoại Việt Nam
-            $.validator.addMethod("phoneVN", function (value, element) {
-                return this.optional(element) || /^(0[3|5|7|8|9])[0-9]{8}$|^\+84[3|5|7|8|9][0-9]{8}$/.test(value);
-            }, "Số điện thoại không hợp lệ");
-            $(document).ready(function () {
-                $('#contact-form').validate({
-                    rules: {
-                        name: {
-                            required: true,
-                            minlength: 2
-                        },
-                        phone: {
-                            required: true,
-                            phoneVN: true
-                        },
-                        email: {
-                            email: true
-                        },
-                        content: {
-                            maxlength: 1000
-                        }
-                    },
-                    messages: {
-                        name: {
-                            required: "Vui lòng nhập họ và tên",
-                            minlength: "Tên quá ngắn"
-                        },
-                        phone: {
-                            required: "Vui lòng nhập số điện thoại",
-                            phoneVN: "Số điện thoại không hợp lệ (ví dụ: 098xxxxxxx)"
-                        },
-                        email: {
-                            email: "Email không hợp lệ"
-                        },
-                        message: {
-                            maxlength: "Ý kiến không vượt quá 1000 ký tự"
-                        }
-                    },
-                    errorElement: 'small',
-                    errorClass: 'text-danger',
-                    highlight: function (element) {
-                        $(element).addClass('is-invalid');
-                    },
-                    unhighlight: function (element) {
-                        $(element).removeClass('is-invalid');
-                    }
-                });
-            });
-        </script>
 @endpush

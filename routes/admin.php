@@ -60,5 +60,6 @@ Route::middleware(['auth:admin'])->prefix('admin')->as('admin.')->group(function
     Route::match(['get', 'post'], 'ajax/attribute-values', [AttributeValueController::class, 'ajax'])->name('ajax.attribute-values');
 
     Route::post('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+    Route::get('/ajax/products/check-code', [ProductController::class, 'checkCodeUniqueness'])->name('ajax.products.check_code');
     Route::resource('branches', BranchController::class);
 });

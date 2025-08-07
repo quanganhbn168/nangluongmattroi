@@ -1,273 +1,268 @@
-function VariantForm({ attributesMaster = [] } = {}) {
-    return {
-        attributesMaster,
-        attributes: [],
-        combinations: [],
-        hasVariants: false,
-        uidCounter: 1,
+document.addEventListener('alpine:init', () => {
+    Alpine.data('variantForm', (initialData) => ({
+        attributes: initialData.oldAttributes.map(attr => ({
+            uid: Math.random().toString(36).substr(2, 9),
+            id: attr.id || '',
+            values: attr.values || []
+        })),
+        attributesMaster: initialData.attributesMaster,
+        combinations: initialData.oldVariants.map(v => ({
+            key: v.attributes.join('-'),
+            attributes: v.attributes,
+            values: v.attributes,
+            price: v.price || 0,
+            sku: v.sku || '',
+            qty: v.qty || 0
+        })),
+        editVariant: {
+            index: null,
+            price: 0,
+            sku: '',
+            qty: 0
+        },
+        bulkEdit: {
+            price: '',
+            sku: '',
+            qty: ''
+        },
 
         init() {
-            this.updateHidden();
-        },
-
-        toggleVariants() {
-            if (this.hasVariants && this.attributes.length === 0) {
-                this.addAttribute();
-            }
-            if (!this.hasVariants) {
-                this.attributes = [];
-                this.combinations = [];
-                this.updateHidden();
-            }
-        },
-
-        // === ATTRIBUTE BLOCK ===
-        addAttribute() {
-            if (this.attributes.length >= 3) return;
-            this.attributes.push({
-                uid: this.uidCounter++,
-                id: '',
-                name: '',
-                isEditing: true,
-                values: [{ uid: this.uidCounter++, value: '' }]
-            });
-            this.updateHidden();
-        },
-
-        finishAttribute(index) {
-            const attr = this.attributes[index];
-            attr.values = attr.values.filter(v => v.value.trim() !== '');
-            if (attr.values.length === 0 || attr.values[attr.values.length - 1].value.trim() !== '') {
-                attr.values.push({ uid: this.uidCounter++, value: '' });
-            }
-            if (!attr.id || attr.values.length === 1 && attr.values[0].value.trim() === '') {
-                alert('Chọn thuộc tính và ít nhất 1 giá trị');
-                return;
-            }
-            attr.isEditing = false;
-            this.generateCombinations();
-            this.updateHidden();
-        },
-
-        editAttribute(index) {
-            const attr = this.attributes[index];
-            attr.isEditing = true;
-            if (attr.values.length === 0 || attr.values[attr.values.length - 1].value.trim() !== '') {
-                attr.values.push({ uid: this.uidCounter++, value: '' });
-            }
-            this.updateHidden();
-
             this.$nextTick(() => {
-                document.querySelectorAll(`#value-block-${index} .select2-value`)
-                    .forEach((el, idx) => initSelect2Value(el, index, idx));
+                this.attributes.forEach((_, index) => {
+                    this.initSelect2(index);
+                });
+                this.updateAvailableAttributes();
             });
         },
 
-        removeValue(attrIndex, valueIndex) {
-            const attr = this.attributes[attrIndex];
-            if (attr.values.length > 1 && valueIndex < attr.values.length - 1) {
-                attr.values.splice(valueIndex, 1);
-
-                this.$nextTick(() => {
-                    document.querySelectorAll(`#value-block-${attrIndex} .select2-value`)
-                        .forEach((el, idx) => initSelect2Value(el, attrIndex, idx));
-                    const lastValue = attr.values[attr.values.length - 1].value.trim();
-                    const buttons = document.querySelectorAll(`#value-block-${attrIndex} .value-row .btn-outline-dark`);
-                    buttons.forEach((button, idx) => {
-                        if (idx === attr.values.length - 1 && lastValue === '') {
-                            button.classList.add('d-none');
-                        } else {
-                            button.classList.remove('d-none');
-                        }
-                    });
-                    console.log('After remove:', attr.values, 'Last value:', lastValue, 'Buttons:', buttons.length);
-                });
-
-                this.generateCombinations();
-                this.updateHidden();
-            }
+        get combinationsJson() {
+            return JSON.stringify(this.combinations);
         },
 
-        updateValue(attrIndex, valueIndex, newValue) {
-            const attr = this.attributes[attrIndex];
-            // Kiểm tra và lấy oldValue an toàn, xử lý giá trị không hợp lệ
-            let oldValue = '';
-            if (valueIndex >= 0 && valueIndex < attr.values.length) {
-                oldValue = attr.values[valueIndex].value || '';
-            } else {
-                console.log('Invalid valueIndex in updateValue:', { attrIndex, valueIndex, values: attr.values });
-                valueIndex = attr.values.length > 0 ? attr.values.length - 1 : 0;
-                if (attr.values.length === 0) {
-                    attr.values.push({ uid: this.uidCounter++, value: '' });
-                }
-            }
-            attr.values[valueIndex] = attr.values[valueIndex] || { uid: this.uidCounter++, value: '' };
-            attr.values[valueIndex].value = newValue || '';
-
-            console.log('Update value:', { attrIndex, valueIndex, oldValue, newValue, values: attr.values });
-
-            // Kiểm tra trạng thái ô trống trước và sau khi cập nhật
-            const hasEmptyBefore = oldValue.trim() === '' || attr.values.some((v, idx) => idx !== valueIndex && v.value.trim() === '');
-            const hasEmptyAfter = attr.values.some((v, idx) => idx !== valueIndex && v.value.trim() === '');
-
-            // Thêm ô trống mới nếu giá trị hợp lệ và không còn ô trống
-            if (newValue && newValue.trim() !== '' && !hasEmptyAfter) {
-                attr.values.push({ uid: this.uidCounter++, value: '' });
-            }
-
-            this.$nextTick(() => {
-                document.querySelectorAll(`#value-block-${attrIndex} .select2-value`)
-                    .forEach((el, idx) => initSelect2Value(el, attrIndex, idx));
-                const lastValue = attr.values[attr.values.length - 1].value.trim();
-                const buttons = document.querySelectorAll(`#value-block-${attrIndex} .value-row .btn-outline-dark`);
-                buttons.forEach((button, idx) => {
-                    if (idx === attr.values.length - 1 && lastValue === '') {
-                        button.classList.add('d-none');
-                    } else {
-                        button.classList.remove('d-none');
-                    }
-                });
-                console.log('After update:', attr.values, 'Last value:', lastValue, 'Buttons:', buttons.length);
-            });
-
-            this.generateCombinations();
-            this.updateHidden();
-        },
-
-        // === COMBINATIONS ===
-        generateCombinations() {
-            const sets = this.attributes
-                .filter(attr => attr.id && attr.values.some(v => v.value.trim() !== ''))
-                .map(attr =>
-                    attr.values
-                        .filter(v => v.value.trim() !== '')
-                        .map(v => ({
-                            attr_id: attr.id,
-                            attr_name: attr.name,
-                            value: v.value
-                        }))
-                );
-
-            if (sets.length === 0) {
-                this.combinations = [];
-                this.updateHidden();
-                return;
-            }
-
-            const cartesian = sets.reduce((acc, group) => {
-                if (acc.length === 0) return group.map(item => [item]);
-                return acc.flatMap(a => group.map(b => [...a, b]));
-            }, []);
-
-            this.combinations = cartesian.map((combo, i) => ({
-                id: i + 1,
-                values: combo,
-                sku: this.combinations[i] ? this.combinations[i].sku : '',
-                price: this.combinations[i] ? this.combinations[i].price : ''
-            }));
-
-            this.updateHidden();
-        },
-
-        removeCombination(index) {
-            this.combinations.splice(index, 1);
-            this.updateHidden();
-        },
-
-        updateHidden() {
-            document.getElementById('input-variants-attributes').value = JSON.stringify(this.attributes);
-            document.getElementById('input-variants-combinations').value = JSON.stringify(this.combinations);
-        }
-    }
-}
-
-function initSelect2Attribute(el, attrIndex) {
-    const cmp = Alpine.$data(el.closest('[x-data]'));
-    const selectEl = $(el);
-
-    const renderOptions = () => {
-        selectEl.empty().append('<option value="">-- chọn --</option>');
-        cmp.attributesMaster.forEach(attr => {
-            const isSelf = String(cmp.attributes[attrIndex].id) === String(attr.id);
-            const isUsed = cmp.attributes.some((a, i) =>
-                i !== attrIndex && String(a.id) === String(attr.id)
+        availableAttributes(index) {
+            const usedIds = this.attributes
+                .filter((_, i) => i !== index)
+                .map(attr => attr.id)
+                .filter(id => id);
+            return this.attributesMaster.filter(master => 
+                !usedIds.includes(master.id)
             );
-            if (!isUsed || isSelf) {
-                selectEl.append(new Option(attr.name, attr.id, isSelf, isSelf));
+        },
+
+        getAttrName(id) {
+            const attr = this.attributesMaster.find(a => a.id === id);
+            return attr ? attr.name : '';
+        },
+
+        addAttribute() {
+            if (this.attributes.length < 3) {
+                this.attributes.push({
+                    uid: Math.random().toString(36).substr(2, 9),
+                    id: '',
+                    values: []
+                });
+                this.$nextTick(() => {
+                    const newIndex = this.attributes.length - 1;
+                    this.initSelect2(newIndex); // Initialize Select2 for new block
+                });
             }
-        });
-    };
+        },
 
-    renderOptions();
+        removeAttribute(index) {
+            this.attributes.splice(index, 1);
+            this.updateAvailableAttributes();
+        },
 
-    selectEl.select2({ theme: 'bootstrap4', tags: true, allowClear: true })
-        .on('select2:select', function (e) {
-            const data = e.params.data;
-            cmp.attributes[attrIndex].id = data.id;
-            cmp.attributes[attrIndex].name = data.text;
-            cmp.attributes[attrIndex].values = [{ uid: cmp.uidCounter++, value: '' }];
+        updateAvailableAttributes() {
+            this.attributes.forEach((_, index) => {
+                const $select = $(this.$refs[`valueSelect_${index}`]);
+                if ($select.data('select2')) {
+                    $select.select2('destroy');
+                }
+                this.$nextTick(() => {
+                    this.initSelect2(index);
+                });
+            });
+        },
 
-            document.querySelectorAll('.select2-attribute').forEach((s, idx) => {
-                if (idx !== attrIndex) {
-                    const sel = $(s);
-                    sel.off('select2:select');
-                    initSelect2Attribute(s, idx);
+        initSelect2(index) {
+            const attr = this.attributes[index];
+            const $select = $(this.$refs[`valueSelect_${index}`]);
+            
+            if (!$select.length) {
+                console.error(`Select element with ref 'valueSelect_${index}' not found`);
+                return;
+            }
+
+            $select.select2({
+                tags: true,
+                placeholder: "Chọn hoặc nhập giá trị",
+                allowClear: true,
+                data: attr.values.map(value => ({
+                    id: value,
+                    text: value,
+                    selected: true
+                }))
+            });
+
+            $select.on('select2:select', (e) => {
+                if (e.params.data.isNew) {
+                    this.saveNewValue(attr.id, e.params.data.id);
+                }
+                this.updateAttributeValues(index, $select);
+            });
+
+            $select.on('select2:unselect', () => {
+                this.updateAttributeValues(index, $select);
+            });
+
+            // Ensure existing values are selected
+            if (attr.values.length > 0) {
+                $select.val(attr.values).trigger('change');
+            }
+        },
+
+        updateValuesSelect(index) {
+            const attr = this.attributes[index];
+            const $select = $(this.$refs[`valueSelect_${index}`]);
+            
+            if (!$select.length) {
+                console.error(`Select element with ref 'valueSelect_${index}' not found`);
+                return;
+            }
+
+            if ($select.data('select2')) {
+                $select.select2('destroy');
+            }
+
+            // Fetch values for the selected attribute from attributesMaster
+            const selectedAttr = this.attributesMaster.find(a => a.id === attr.id);
+            const availableValues = selectedAttr?.values || [];
+
+            $select.select2({
+                tags: true,
+                placeholder: "Chọn hoặc nhập giá trị",
+                allowClear: true,
+                data: availableValues.map(value => ({
+                    id: value,
+                    text: value,
+                    selected: attr.values.includes(value)
+                }))
+            });
+
+            $select.on('select2:select', (e) => {
+                if (e.params.data.isNew) {
+                    this.saveNewValue(attr.id, e.params.data.id);
+                }
+                this.updateAttributeValues(index, $select);
+            });
+
+            $select.on('select2:unselect', () => {
+                this.updateAttributeValues(index, $select);
+            });
+
+            // Set current values
+            if (attr.values.length > 0) {
+                $select.val(attr.values).trigger('change');
+            }
+        },
+
+        updateAttributeValues(index, select) {
+            this.attributes[index].values = $(select).val() || [];
+            // Trigger change to update combinations if needed
+            this.$nextTick(() => {
+                if (this.combinations.length > 0) {
+                    this.generateCombinations();
                 }
             });
+        },
 
-            cmp.$nextTick(() => {
-                document.querySelectorAll(`#value-block-${attrIndex} .select2-value`)
-                    .forEach((el, idx) => initSelect2Value(el, attrIndex, idx));
+        saveNewValue(attributeId, value) {
+            if (!attributeId) return;
+            
+            $.ajax({
+                url: '/api/attribute-values',
+                method: 'POST',
+                data: {
+                    attribute_id: attributeId,
+                    value: value,
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: (response) => {
+                    console.log('Value saved:', response);
+                    const attr = this.attributesMaster.find(a => a.id === attributeId);
+                    if (attr && !attr.values.includes(value)) {
+                        attr.values = attr.values ? [...attr.values, value] : [value];
+                        this.updateValuesSelect(this.attributes.findIndex(a => a.id === attributeId));
+                    }
+                },
+                error: (error) => {
+                    console.error('Error saving value:', error);
+                }
             });
+        },
 
-            cmp.generateCombinations();
-            cmp.updateHidden();
-        });
-}
+        generateCombinations() {
+            const combinations = [];
+            const values = this.attributes
+                .filter(attr => attr.id && attr.values.length > 0)
+                .map(attr => attr.values);
 
-function initSelect2Value(el, attrIndex, valueIndex) {
-    const cmp = Alpine.$data(el.closest('[x-data]'));
-    const selectEl = $(el);
+            if (values.length === 0) return;
 
-    const attrId = cmp.attributes[attrIndex].id;
-    const masterValues = (cmp.attributesMaster.find(a => String(a.id) === String(attrId))?.values || []);
-    const currentValues = cmp.attributes[attrIndex].values;
+            const generate = (current, depth) => {
+                if (depth === values.length) {
+                    const key = current.join('-');
+                    const existing = this.combinations.find(c => c.key === key);
+                    combinations.push({
+                        key,
+                        attributes: current,
+                        values: current,
+                        price: existing?.price || 0,
+                        sku: existing?.sku || '',
+                        qty: existing?.qty || 0
+                    });
+                    return;
+                }
 
-    // Đảm bảo valueIndex hợp lệ
-    if (valueIndex < 0 || valueIndex >= currentValues.length) {
-        console.log('Invalid valueIndex:', { attrIndex, valueIndex, currentValues });
-        if (currentValues.length === 0) {
-            currentValues.push({ uid: cmp.uidCounter++, value: '' });
+                for (const value of values[depth]) {
+                    generate([...current, value], depth + 1);
+                }
+            };
+
+            generate([], 0);
+            this.combinations = combinations;
+        },
+
+        openEditModal(index) {
+            this.editVariant = {
+                index,
+                price: this.combinations[index].price || 0,
+                sku: this.combinations[index].sku || '',
+                qty: this.combinations[index].qty || 0
+            };
+        },
+
+        saveVariant() {
+            const { index, price, sku, qty } = this.editVariant;
+            this.combinations[index] = {
+                ...this.combinations[index],
+                price: price || 0,
+                sku: sku || '',
+                qty: qty || 0
+            };
+            $('#editVariantModal').modal('hide');
+        },
+
+        applyBulkEdit() {
+            this.combinations = this.combinations.map(combo => ({
+                ...combo,
+                price: this.bulkEdit.price !== '' ? this.bulkEdit.price : combo.price,
+                sku: this.bulkEdit.sku !== '' ? this.bulkEdit.sku : combo.sku,
+                qty: this.bulkEdit.qty !== '' ? this.bulkEdit.qty : combo.qty
+            }));
+            this.bulkEdit = { price: '', sku: '', qty: '' };
+            $('#bulkEditModal').modal('hide');
         }
-        valueIndex = currentValues.length - 1;
-    }
-
-    // Lọc các giá trị chưa được sử dụng (trừ giá trị tại valueIndex)
-    const usedValues = currentValues
-        .filter((v, idx) => idx !== valueIndex && v.value.trim() !== '')
-        .map(v => v.value.trim().toLowerCase());
-
-    const availableValues = masterValues.filter(v => 
-        !usedValues.includes(v.value.trim().toLowerCase())
-    );
-
-    // Thêm giá trị hiện tại (nếu có) vào danh sách để hiển thị trong dropdown
-    const currentValue = currentValues[valueIndex]?.value.trim();
-    if (currentValue && !availableValues.some(v => v.value.trim().toLowerCase() === currentValue.toLowerCase())) {
-        availableValues.push({ value: currentValue });
-    }
-
-    // Render options
-    selectEl.empty().append('<option value="">-- chọn --</option>');
-    availableValues.forEach(v => {
-        const isSelected = currentValue && v.value.trim().toLowerCase() === currentValue.toLowerCase();
-        selectEl.append(new Option(v.value, v.value, isSelected, isSelected));
-    });
-
-    selectEl.select2({ theme: 'bootstrap4', tags: true, allowClear: true })
-        .on('select2:select', function (e) {
-            const data = e.params.data;
-            console.log('Select2 select:', { attrIndex, valueIndex, data });
-            cmp.updateValue(attrIndex, valueIndex, data.text);
-        });
-}
+    }));
+});

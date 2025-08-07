@@ -16,6 +16,12 @@
         <link rel="stylesheet" href="{{ asset('vendor/adminlte/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
         <link rel="stylesheet" href="{{asset('plugins/sweetalert2/bootstrap-4.min.css')}}">
         <link rel="stylesheet" href="{{asset('plugins/toastr/toastr.min.css')}}">
+        {{-- AdminLTE Assets --}}
+        <link rel="stylesheet" href="{{ asset('vendor/adminlte/plugins/fontawesome-free/css/all.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('vendor/adminlte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('vendor/adminlte/plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('vendor/adminlte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('vendor/adminlte/plugins/datatables-select/css/select.bootstrap4.min.css') }}">
         <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
@@ -60,17 +66,31 @@
             @include('partials.admin.footer')
         </div>
 
-        <script src="{{asset('js/jquery-3.7.1.min.js')}}"></script>
-        {{-- AdminLTE Scripts --}}
-        <script src="{{ asset('vendor/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-        <script src="{{ asset('vendor/adminlte/dist/js/adminlte.min.js') }}"></script>
-        <script src="//unpkg.com/alpinejs" defer></script>
-        <!-- toast and  sweetalert2 -->
-        <script src="{{asset('plugins/toastr/toastr.min.js')}}"></script>
-        <script src="{{asset('plugins/sweetalert2/sweetalert2.min.js')}}"></script>
-        <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-        <script src="{{ asset('vendor/adminlte/plugins/select2/js/select2.full.min.js') }}"></script>
+    <script src="{{asset('js/jquery-3.7.1.min.js')}}"></script>
+    {{-- AdminLTE Scripts --}}
+    <script src="{{ asset('vendor/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{asset('plugins/toastr/toastr.min.js')}}"></script>
+    <script src="{{asset('plugins/sweetalert2/sweetalert2.min.js')}}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="{{ asset('vendor/adminlte/plugins/select2/js/select2.full.min.js') }}"></script>
 
+    <script src="{{ asset('vendor/adminlte/plugins/datatables/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('vendor/adminlte/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+    <script src="{{ asset('vendor/adminlte/plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
+    <script src="{{ asset('vendor/adminlte/plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
+    <script src="{{ asset('vendor/adminlte/plugins/datatables-buttons/js/dataTables.buttons.min.js') }}"></script>
+    <script src="{{ asset('vendor/adminlte/plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
+    <script src="{{ asset('vendor/DataTables/buttons.server-side.js') }}"></script>
+    <script src="{{ asset('vendor/adminlte/plugins/jszip/jszip.min.js') }}"></script>
+    <script src="{{ asset('vendor/adminlte/plugins/pdfmake/pdfmake.min.js') }}"></script>
+    <script src="{{ asset('vendor/adminlte/plugins/pdfmake/vfs_fonts.js') }}"></script>
+    <script src="{{ asset('vendor/adminlte/plugins/datatables-buttons/js/buttons.html5.min.js') }}"></script>
+    <script src="{{ asset('vendor/adminlte/plugins/datatables-buttons/js/buttons.print.min.js') }}"></script>
+    <script src="{{ asset('vendor/adminlte/plugins/datatables-buttons/js/buttons.colVis.min.js') }}"></script>
+    <script src="{{ asset('vendor/adminlte/plugins/datatables-select/js/dataTables.select.min.js') }}"></script>
+    <script src="{{ asset('vendor/adminlte/plugins/datatables-select/js/select.bootstrap4.min.js') }}"></script>
+
+    <script src="{{ asset('vendor/adminlte/dist/js/adminlte.min.js') }}"></script>
         <script>
     const Toast = Swal.mixin({
         toast: true,
@@ -79,25 +99,22 @@
         timer: 3000
     });
 </script>
-
 <script>
-document.addEventListener('alpine:init', () => {
-    Alpine.directive('sortable', (el, {expression}, {evaluate}) => {
-        let getItems = () => evaluate(expression);
-
-        new Sortable(el, {
-            animation: 150,
-            handle: '.handle',
-            onEnd: function (evt) {
-                if (evt.oldIndex === evt.newIndex) return;
-
-                let items = getItems();
-                const [moved] = items.splice(evt.oldIndex, 1);
-                items.splice(evt.newIndex, 0, moved);
-            }
-        });
+  $(function () {
+    $("#example1").DataTable({
+      "responsive": true, "lengthChange": false, "autoWidth": false,
+      "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+    }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+    $('#example2').DataTable({
+      "paging": true,
+      "lengthChange": false,
+      "searching": false,
+      "ordering": true,
+      "info": true,
+      "autoWidth": false,
+      "responsive": true,
     });
-});
+  });
 </script>
 @if(session('success'))
     <script>

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use App\Traits\HasImageGallery;
 use App\Traits\UploadImageTrait;
-
+use Illuminate\Database\Eloquent\Relations\HasMany;
 class Product extends Model
 {
     /** @use HasFactory<\Database\Factories\ProductFactory> */
@@ -73,5 +73,8 @@ class Product extends Model
     {
         return $this->morphMany(Image::class, 'item');
     }
-
+    public function brand()
+    {
+        return $this->belongsTo(Brand::class);
+    }
 }

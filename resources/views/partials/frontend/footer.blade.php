@@ -99,7 +99,7 @@
 			</div>
 			<div class="col-12 col-md-4 col-sm-12">
 				<div class="footer-item">
-					<form action="{{rouet('contact.store')}}" id="contact-form">
+					<form action="{{route('contact.store')}}" id="contact-form">
 						<p>Đăng ký nhận tư vấn miễn phí</p>
 						<input type="text" name="name" placeholder="Họ và tên" required>
 						<input type="text" name="phone" placeholder="Số điện thoại" required>

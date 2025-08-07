@@ -1,3 +1,5 @@
+{{-- File: resources/views/components/form/image-multi-input.blade.php --}}
+
 @props([
     'name',
     'label',
@@ -16,34 +18,38 @@
         {{ $label }} @if($required)<span class="text-danger">*</span>@endif
     </label>
 
-        {{-- Input upload ảnh mới --}}
-        <input
-            type="file"
-            name="{{ $name }}[]"
-            id="{{ $inputId }}"
-            multiple
-            accept="image/*"
-            {{ $attributes->merge(['class' => 'form-control' . ($errors->has($name) ? ' is-invalid' : '')]) }}
-            onchange="previewMultiImage('{{ $inputId }}', '{{ $wrapperId }}')"
-        >
+    {{-- Input upload ảnh mới --}}
+    <input
+        type="file"
+        name="{{ $name }}[]"
+        id="{{ $inputId }}"
+        multiple
+        accept="image/*"
+        {{ $attributes->merge(['class' => 'form-control' . ($errors->has($name) ? ' is-invalid' : '')]) }}
+        onchange="previewMultiImage('{{ $inputId }}', '{{ $wrapperId }}')"
+    >
 
-        @error($name)
-            <div class="invalid-feedback d-block">{{ $message }}</div>
-        @enderror
+    @error($name)
+        <div class="invalid-feedback d-block">{{ $message }}</div>
+    @enderror
 
-        {{-- Hiển thị ảnh cũ & ảnh mới --}}
-        <div id="{{ $wrapperId }}" class="d-flex flex-wrap mt-3 gap-2">
-            @foreach($images as $index => $image)
-                <div class="preview-image-item position-relative" style="width: 120px; border: 2px dashed #ccc; padding: 5px; border-radius: 6px;">
-                    <img src="{{ asset($image) }}" class="img-thumbnail" style="width: 100%; height: 100px; object-fit: cover;">
-                    <input type="hidden" name="gallery_old[]" value="{{ $image }}">
-                    <button type="button" class="btn btn-sm btn-danger position-absolute" style="top: 3px; right: 3px; padding: 0.15rem 0.4rem;"
-                        onclick="this.parentElement.remove()">×</button>
-                </div>
-            @endforeach
-        </div>
+    {{-- Hiển thị ảnh cũ & ảnh mới --}}
+    <div id="{{ $wrapperId }}" class="d-flex flex-wrap mt-3 gap-2">
+        @foreach($images as $index => $image)
+            <div class="preview-image-item position-relative" style="width: 120px; border: 2px dashed #ccc; padding: 5px; border-radius: 6px;">
+                
+                {{-- SỬA Ở ĐÂY: Thêm ->image để lấy đường dẫn --}}
+                <img src="{{ asset($image->image) }}" class="img-thumbnail" style="width: 100%; height: 100px; object-fit: cover;">
+                
+                {{-- SỬA Ở ĐÂY: Thêm ->image để lấy đường dẫn --}}
+                <input type="hidden" name="gallery_old[]" value="{{ $image->image }}">
+                
+                <button type="button" class="btn btn-sm btn-danger position-absolute" style="top: 3px; right: 3px; padding: 0.15rem 0.4rem;"
+                    onclick="this.parentElement.remove()">×</button>
+            </div>
+        @endforeach
+    </div>
 </div>
-
 @push('js')
 <script>
     const fileListMap = {};
@@ -104,7 +110,7 @@
             input.files = dt.files;
         }
 
-        button.parentElement.remove(); // xoá ảnh DOM
+        button.parentElement.remove();
     }
 </script>
 @endpush

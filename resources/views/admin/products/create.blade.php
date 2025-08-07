@@ -1,14 +1,11 @@
 @extends('layouts.admin')
 
-@section('title', isset($product) ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới')
-@section('content_header', isset($product) ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới')
+@section('title','Thêm sản phẩm mới')
+@section('content_header', 'Thêm sản phẩm mới')
 
 @section('content')
-<form action="{{ isset($product) ? route('admin.products.update', $product) : route('admin.products.store') }}" 
-      method="POST" enctype="multipart/form-data">
+<form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
     @csrf
-    @if(isset($product)) @method('PUT') @endif
-
     <div class="card card-widget">
         <div class="card-header">
             <h3 class="card-title">Quản lý sản phẩm</h3>
@@ -36,8 +33,10 @@
 
                 {{-- Tab 1: Thông tin chung --}}
                 <div class="tab-pane fade show active" id="tab-general" role="tabpanel">
-                    <x-form.input name="name" label="Tên sản phẩm" :value="old('name', $product->name ?? '')" required />
-                    <x-form.input name="code" label="Mã sản phẩm" :value="old('code', $product->code ?? '')" />
+                    <x-form.input name="name" label="Tên sản phẩm" :value="old('name', $product->name ?? '')" required placeholder="Tên sản phẩm"/>
+                    <x-form.input name="code" label="Mã sản phẩm" :value="old('code', $product->code ?? '')" placeholder="Nhập mã sản phẩm" />
+                    <div id="code-check-status" class="mt-1"></div>
+
                     <div class="row">
                         <div class="col-6">
                             <x-form.select-ajax
@@ -69,12 +68,12 @@
                                 :value="old('price', $product->price ?? 0)" />
                         </div>
                     </div>
+                    <x-form.image-input name="image" label="Ảnh đại diện" :value="$product->image ?? ''" />
+                    <x-form.image-multi-input name="gallery" label="Ảnh chi tiết" :images="$product->gallery ?? []" />
 
                     <x-form.textarea name="description" label="Mô tả" :value="old('description', $product->description ?? '')" />
                     <x-form.ckeditor name="content" label="Nội dung chi tiết" :value="old('content', $product->content ?? '')" />
-                    <x-form.image-multi-input name="gallery" label="Ảnh chi tiết" :images="$product->gallery ?? []" />
-                </div>
-
+                    </div>
                 {{-- Tab 2: Thuộc tính phụ --}}
                 <div class="tab-pane fade" id="tab-attributes" role="tabpanel">
                     {{-- Ở đây anh sẽ render các thuộc tính phụ như màu sắc, chất liệu... --}}
@@ -84,13 +83,19 @@
 
                 {{-- Tab 3: Biến thể --}}
                 <div class="tab-pane fade" id="tab-variants" role="tabpanel">
-                    <x-product._variants :product="$product ?? null" :attribute="$attribute" />
+                    <x-form.switch name="has_variants" label="Sản phẩm có biến thể?" :checked="old('has_variants', false)" />
+                    <div id="variants-section" style="display: none;">
+                        @include('partials.admin.product.variants', [
+                            'product' => null,
+                            'allAttributes' => $attributes
+                        ])
+                    </div>
                 </div>
 
                 {{-- Tab 4: SEO & Hiển thị --}}
                 <div class="tab-pane fade" id="tab-seo" role="tabpanel">
-                    <x-form.image-input name="image" label="Ảnh đại diện" :value="$product->image ?? ''" />
-                    <x-form.image-input name="banner" label="Banner (tuỳ chọn)" :value="$product->banner ?? ''" />
+                    
+                    {{-- <x-form.image-input name="banner" label="Banner (tuỳ chọn)" :value="$product->banner ?? ''" /> --}}
                     <x-form.switch name="status" label="Trạng thái" :checked="old('status', $product->status ?? true)" />
                     <hr>
                     <x-form.textarea name="meta_des" label="Meta Description" :value="old('meta_des', $product->meta_des ?? '')" />

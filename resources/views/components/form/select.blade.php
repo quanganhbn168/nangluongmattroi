@@ -1,5 +1,5 @@
 {{-- resources/views/components/form/select.blade.php --}}
-@props(['name', 'label', 'options' => [], 'selected' => '', 'required' => false, 'placeholder'])
+@props(['name', 'label', 'options' => [], 'selected' => '', 'required' => false, 'placeholder' => '--- Chọn ---'])
 
 @php
     $selected = old($name, $selected);

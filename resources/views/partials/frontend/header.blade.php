@@ -1,194 +1,186 @@
-@push('css')
-<style>
-
-</style>
-@endpush
 <header class="header">
-    <div class="header-top bg-dark">
-        <div class="container d-flex justify-content-between align-items-center">
-            <div class="header-top_item d-flex align-items-center">
-                <a href="{{route('home')}}" style="color:rgba(255,255,255,0.7)">{{$setting->name}}</a>
+    <div class="top-bar d-none d-lg-block">
+        <div class="container">
             </div>
-            <div class="header-top_item d-flex align-items-center">
-                @if(isset($setting->phone)) 
-                <a href="tel:{{ $setting->phone }}" class="text-white me-3">
-                    <i class="fa fa-phone"></i> {{ $setting->phone }}
-                </a>
-                @endif
-
-                <a href="{{ route('cart.index') }}" class="text-white me-3"> 
-                    <i class="fa fa-shopping-cart"></i>
-                </a>
-                <a href="{{route('login')}}" class="text-white"> 
-                    <i class="fa fa-user"></i> Đăng nhập
-                </a>
+    </div>
+    <div class="main-header">
+        <div class="container">
+            <div class="main-header-inner">
+                <div class="header-col-left">
+                    <div class="mobile-menu-toggle d-lg-none">
+                        <a href="#" aria-label="Toggle Menu"><i class="fa fa-bars"></i></a>
+                    </div>
+                    <div class="logo d-none d-lg-block">
+                        <a href="{{ url('/') }}">
+                            <img src="{{asset($setting->logo)}}" alt="Logo">
+                        </a>
+                    </div>
+                </div>
+                <div class="header-col-center">
+                    <div class="logo d-lg-none">
+                        <a href="{{ url('/') }}">
+                            <img src="{{asset($setting->logo)}}" alt="Logo">
+                        </a>
+                    </div>
+                    <div class="search-box d-none d-lg-block">
+                        <form action="/search" method="get">
+                            <input type="text" class="form-control" placeholder="Bạn tìm gì hôm nay?">
+                            <button type="submit"><i class="fa fa-search"></i></button>
+                        </form>
+                    </div>
+                </div>
+                <div class="header-col-right">
+                    <div class="header-actions">
+                        <div class="user-actions d-none d-lg-block">
+                            <a href="/login">Đăng nhập</a> / <a href="/register">Đăng ký</a>
+                        </div>
+                        <div class="cart-action">
+                            <a href="/cart" class="cart-icon">
+                                <i class="fa fa-shopping-cart"></i>
+                                <span class="cart-count">3</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    <nav class="navbar navbar-expand-lg navbar-light" style="background-color:#ffffff">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{{route('home')}}">
-                <img src="{{asset($setting->logo)}}" alt="{{$setting->name}}" class="d-inline-block align-top">
-            </a>
-
-            <button class="navbar-toggler" type="button" data-toggle="offcanvas" aria-controls="offcanvasNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item active">
-                        <a class="nav-link" href="{{route('home')}}">TRANG CHỦ <span class="sr-only">(current)</span></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">GIỚI THIỆU</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">DỊCH VỤ</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownSanPham" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            SẢN PHẨM
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdownSanPham">
-                            <a class="dropdown-item" href="#">Sản phẩm 1</a>
-                            <a class="dropdown-item" href="#">Sản phẩm 2</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#">Sản phẩm khác</a>
-                        </div>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">DỰ ÁN ĐÃ LÀM</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">BẢO HÀNH</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">TIN TỨC</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{route('contact.show')}}">LIÊN HỆ</a>
-                    </li>
-                </ul>
+    <div class="mobile-search-container d-lg-none">
+        <div class="container">
+            <div class="search-box">
+                <form action="/search" method="get">
+                    <input type="text" class="form-control" placeholder="Tìm kiếm sản phẩm...">
+                    <button type="submit"><i class="fa fa-search"></i></button>
+                </form>
             </div>
         </div>
-
-        <div class="offcanvas-collapse" id="offcanvasNav">
-            <div class="offcanvas-header">
-                <h5 class="offcanvas-title">
-                    <a href="{{route('home')}}">
-                        <img src="{{asset($setting->home)}}" alt="{{$setting->name}}" height="70">
-                    </a>
-                </h5>
-                <button type="button" class="close" data-dismiss="offcanvas" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="offcanvas-body">
-                <ul class="navbar-nav">
-                    <li class="nav-item active">
-                        <a class="nav-link" href="{{route('home')}}">TRANG CHỦ <span class="sr-only">(current)</span></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">GIỚI THIỆU</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">DỊCH VỤ</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="offcanvasDropdownSanPham" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            SẢN PHẨM
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="offcanvasDropdownSanPham">
-                            <a class="dropdown-item" href="#">Sản phẩm 1</a>
-                            <a class="dropdown-item" href="#">Sản phẩm 2</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#">Sản phẩm khác</a>
-                        </div>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">DỰ ÁN ĐÃ LÀM</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">BẢO HÀNH</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">TIN TỨC</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{route('contact.show')}}">LIÊN HỆ</a>
-                    </li>
-                </ul>
-            </div>
+    </div>
+    <nav class="main-nav-container d-none d-lg-block">
+        <div class="container">
+            <ul class="main-menu-desktop">
+                <li><a href="/">Trang Chủ</a></li>
+                <li class="menu-item-has-children">
+                    <a href="/san-pham">Sản Phẩm</a>
+                    <span class="submenu-toggle"><i class="fa fa-angle-down"></i></span>
+                    <ul class="sub-menu">
+                        <li><a href="#">Áo Sơ Mi</a></li>
+                        <li><a href="#">Áo Thun</a></li>
+                        <li class="menu-item-has-children">
+                            <a href="#">Quần Dài</a>
+                            <span class="submenu-toggle"><i class="fa fa-angle-right"></i></span>
+                            <ul class="sub-menu">
+                                <li><a href="#">Quần Kaki</a></li>
+                                <li><a href="#">Quần Jeans</a></li>
+                                <li><a href="#">Quần Tây</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#">Phụ Kiện</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item-has-children">
+                    <a href="/blog">Tin Tức</a>
+                     <span class="submenu-toggle"><i class="fa fa-angle-down"></i></span>
+                    <ul class="sub-menu">
+                        <li><a href="#">Tin Khuyến Mãi</a></li>
+                        <li><a href="#">Tin Thời Trang</a></li>
+                    </ul>
+                </li>
+                <li><a href="/about-us">Về Chúng Tôi</a></li>
+                <li><a href="/contact">Liên Hệ</a></li>
+            </ul>
         </div>
     </nav>
-    <div class="offcanvas-backdrop"></div>
 </header>
+<div class="offcanvas-menu-wrapper">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">MENU</h5>
+        <a href="#" class="offcanvas-close"><i class="fa fa-times"></i></a>
+    </div>
+    <div class="offcanvas-menu-content">
+        </div>
+</div>
+<div class="cart-offcanvas-wrapper">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">Giỏ Hàng Của Bạn</h5>
+        <a href="#" class="offcanvas-close js-close-cart"><i class="fa fa-times"></i></a>
+    </div>
+    <div class="offcanvas-body">
+        <div class="cart-item">
+            <div class="cart-item_image">
+                <img src="https://placehold.co/100x100/EF6C00/FFFFFF?text=SP1" alt="Sản phẩm 1">
+            </div>
+            <div class="cart-item_info">
+                <a href="#" class="item-name">Tấm pin năng lượng mặt trời Mono 550W</a>
+                <div class="item-meta">
+                    <span class="item-price">2,500,000đ</span>
+                    <span class="item-quantity">x 2</span>
+                </div>
+            </div>
+            <a href="#" class="item-remove"><i class="fa fa-trash"></i></a>
+        </div>
+        <div class="cart-item">
+            <div class="cart-item_image">
+                <img src="https://placehold.co/100x100/424242/FFFFFF?text=SP2" alt="Sản phẩm 2">
+            </div>
+            <div class="cart-item_info">
+                <a href="#" class="item-name">Biến tần Inverter Hybrid 5kW</a>
+                <div class="item-meta">
+                    <span class="item-price">15,000,000đ</span>
+                    <span class="item-quantity">x 1</span>
+                </div>
+            </div>
+            <a href="#" class="item-remove"><i class="fa fa-trash"></i></a>
+        </div>
+        </div>
+    <div class="offcanvas-footer">
+        <div class="cart-summary">
+            <span>Tổng cộng:</span>
+            <span class="total-price">20,000,000đ</span>
+        </div>
+        <a href="/cart" class="btn btn-dark w-100">Xem Giỏ Hàng</a>
+        <a href="/checkout" class="btn btn-primary w-100 mt-2">Thanh Toán</a>
+    </div>
+</div>
+<div class="offcanvas-overlay"></div>
 @push('js')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-    const offcanvasToggle = document.querySelector('[data-toggle="offcanvas"]');
-    const offcanvasNav = document.getElementById('offcanvasNav');
-    const offcanvasBackdrop = document.querySelector('.offcanvas-backdrop');
-    const offcanvasCloseButton = offcanvasNav.querySelector('.close');
-    const body = document.body;
-
-    function toggleOffcanvas() {
-        offcanvasNav.classList.toggle('open');
-        offcanvasBackdrop.classList.toggle('show');
-        body.classList.toggle('offcanvas-active'); // To prevent body scrolling
-    }
-
-    // Toggle when hamburger button is clicked
-    if (offcanvasToggle) {
-        offcanvasToggle.addEventListener('click', toggleOffcanvas);
-    }
-
-    // Close when backdrop is clicked
-    if (offcanvasBackdrop) {
-        offcanvasBackdrop.addEventListener('click', toggleOffcanvas);
-    }
-
-    // Close when the close button inside offcanvas is clicked
-    if (offcanvasCloseButton) {
-        offcanvasCloseButton.addEventListener('click', toggleOffcanvas);
-    }
-
-    // Handle dropdowns inside the offcanvas
-    // This part is important because Bootstrap 4's dropdowns rely on a parent
-    // being visible. When the offcanvas slides in, the dropdowns need to be re-initialized
-    // or handled manually. We'll use custom JS to toggle them.
-    const offcanvasDropdownToggles = offcanvasNav.querySelectorAll('.dropdown-toggle');
-
-    offcanvasDropdownToggles.forEach(function(toggle) {
-        toggle.addEventListener('click', function(event) {
-            event.preventDefault(); // Prevent default link behavior
-            const dropdownMenu = this.nextElementSibling;
-            if (dropdownMenu && dropdownMenu.classList.contains('dropdown-menu')) {
-                // Toggle 'show' class to display/hide the dropdown
-                dropdownMenu.classList.toggle('show');
-            }
-
-            // Close other open dropdowns in the offcanvas
-            offcanvasDropdownToggles.forEach(function(otherToggle) {
-                if (otherToggle !== toggle) {
-                    const otherDropdownMenu = otherToggle.nextElementSibling;
-                    if (otherDropdownMenu && otherDropdownMenu.classList.contains('dropdown-menu')) {
-                        otherDropdownMenu.classList.remove('show');
-                    }
+    $(document).ready(function() {
+        const header = $('header.header');
+            $(window).on('scroll', function() {
+                if ($(window).scrollTop() > 10) {
+                    header.addClass('header-scrolled');
+                } else {
+                    header.removeClass('header-scrolled');
                 }
             });
+        if ($('.offcanvas-menu-content .main-menu-desktop').length === 0) {
+            $('.main-menu-desktop').clone().appendTo('.offcanvas-menu-content');
+        }
+        $('.mobile-menu-toggle a').on('click', function(e) {
+            e.preventDefault();
+            $('body').addClass('show-offcanvas');
+        });
+        $('.offcanvas-menu-content').on('click', '.submenu-toggle', function(e) {
+            e.preventDefault();
+            $(this).parent('.menu-item-has-children').toggleClass('open');
+            $(this).siblings('.sub-menu').slideToggle(300);
+        });
+        $('.cart-action > a').on('click', function(e) {
+            e.preventDefault(); 
+            $('body').addClass('show-cart-offcanvas');
+        });
+        $('.offcanvas-menu-wrapper .offcanvas-close').on('click', function(e) {
+            e.preventDefault();
+            $('body').removeClass('show-offcanvas');
+        });
+        $('.cart-offcanvas-wrapper .js-close-cart').on('click', function(e) {
+            e.preventDefault();
+            $('body').removeClass('show-cart-offcanvas');
+        });
+        $('.offcanvas-overlay').on('click', function(e) {
+            e.preventDefault();
+            $('body').removeClass('show-offcanvas show-cart-offcanvas');
         });
     });
-
-    // Close dropdowns if clicking outside (within the offcanvas, not the backdrop)
-    offcanvasNav.addEventListener('click', function(event) {
-        if (!event.target.closest('.dropdown-toggle') && !event.target.closest('.dropdown-menu')) {
-            offcanvasNav.querySelectorAll('.dropdown-menu.show').forEach(function(menu) {
-                menu.classList.remove('show');
-            });
-        }
-    });
-});
 </script>
 @endpush

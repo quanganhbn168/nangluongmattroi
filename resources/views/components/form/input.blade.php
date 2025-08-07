@@ -1,5 +1,5 @@
 {{-- resources/views/components/form/input.blade.php --}}
-@props(['name', 'label', 'value' => '', 'required' => false, 'type' => 'text'])
+@props(['name', 'label', 'value' => '', 'required' => false, 'type' => 'text', 'placeholder'=>'Thông tin'])
 
 @php $inputValue = old($name, $value); @endphp
 
@@ -14,6 +14,7 @@
             id="{{ $name }}"
             value="{{ $inputValue }}"
             {{ $attributes->merge(['class' => 'form-control' . ($errors->has($name) ? ' is-invalid' : '')]) }}
+            placeholder="{{$placeholder}}"
         >
         @error($name)
             <div class="invalid-feedback d-block">{{ $message }}</div>
