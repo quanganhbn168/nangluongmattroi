@@ -17,13 +17,14 @@ class UserSeeder extends Seeder
         // Admin mặc định
         User::create([
             'name' => 'Admin',
-            'email' => 'admin@example.com',
+            'phone' => '0965625210',
+            'email' => 'user@example.com',
             'email_verified_at' => now(),
             'password' => Hash::make('admin123'),
             'remember_token' => \Str::random(10),
         ]);
 
         // Thêm user ngẫu nhiên nếu muốn
-        User::factory(5)->create();
+        // User::factory(5)->create();
     }
 }

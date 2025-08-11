@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('order_details', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('product_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('order_id')->constrained('orders')->cascadeOnDelete();
+            $table->foreignId('product_id')->nullable()->constrained('products')->nullOnDelete();
             $table->string('product_name');
-            $table->decimal('product_price', 10, 2);
+            $table->decimal('product_price', 15, 2); 
             $table->integer('quantity')->default(1);
-            $table->decimal('subtotal', 10, 2);
+            $table->decimal('subtotal', 15, 2); 
+            $table->timestamp('warranty_expires_at')->nullable(); 
             $table->timestamps();
         });
     }

@@ -41,7 +41,7 @@ class AuthController extends Controller
     // Hiển thị form đăng ký (dành cho user)
     public function showRegisterForm()
     {
-        return view('auth.register');
+        return view('auth.client.register');
     }
 
     // Xử lý đăng ký (chỉ dành cho user, không áp dụng cho admin)
@@ -49,15 +49,19 @@ class AuthController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'unique:users,phone'],
             'email' => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'min:6', 'confirmed'],
         ]);
 
         $user = User::create([
             'name' => $data['name'],
+            'phone' => $data['phone'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
         ]);
+
+        $user->assignRole('customer');
 
         Auth::login($user);
 

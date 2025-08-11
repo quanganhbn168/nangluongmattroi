@@ -69,7 +69,7 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         $product->load([
-            'variants.attributeValues',
+            'variants.attributeValues.attribute',
             'category',
             'brand',
             'images',

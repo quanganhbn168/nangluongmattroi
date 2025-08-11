@@ -11,7 +11,7 @@
         "kreait/laravel-firebase": "^6.1",
         "laravel/framework": "^11.0",
         "laravel/tinker": "^2.9",
-        "spatie/laravel-permission": "^6.20",
+        "spatie/laravel-permission": "^6.21",
         "spatie/laravel-sitemap": "^7.3",
         "unisharp/laravel-filemanager": "^2.10",
         "yajra/laravel-datatables": "^11.0",

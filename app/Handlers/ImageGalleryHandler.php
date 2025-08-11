@@ -32,7 +32,7 @@ class ImageGalleryHandler
         // Thêm ảnh mới
         foreach ($newImages as $image) {
             if (method_exists($model, 'uploadImage')) {
-                $path = $model->uploadImage($image, $folder, $resize, true);
+                $path = $model->uploadImage($image, $folder, $resize,800, true);
                 $model->addImage($path);
             }
         }

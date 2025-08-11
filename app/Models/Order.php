@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
@@ -11,22 +11,34 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
-        'customer_name',
-        'customer_email',
-        'customer_phone',
-        'customer_address',
+        'technician_id',
+        'status',
+        'installation_date',
         'note',
         'total_price',
-        'status',
     ];
 
-    public function user()
+    /**
+     * Lấy thông tin khách hàng của đơn hàng này.
+     */
+    public function customer()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function details()
+    /**
+     * Lấy thông tin người thợ được gán cho đơn hàng này.
+     */
+    public function technician()
     {
-        return $this->hasMany(OrderDetail::class);
+        return $this->belongsTo(User::class, 'technician_id');
+    }
+
+    /**
+     * Lấy tất cả các sản phẩm trong đơn hàng này.
+     */
+    public function items()
+    {
+        return $this->hasMany(OrderItem::class);
     }
 }

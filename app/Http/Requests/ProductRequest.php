@@ -45,7 +45,7 @@ class ProductRequest extends FormRequest
             $rules['variants'] = ['required', 'array', 'min:1'];
             $rules['variants.*.price'] = ['required', 'numeric', 'min:0'];
             $rules['variants.*.stock'] = ['nullable', 'integer', 'min:0'];
-            $rules['variants.*.attributes'] = ['required', 'array'];
+            // $rules['variants.*.attributes'] = ['required', 'array'];
             $rules['variants.*.id'] = ['nullable', 'integer', 'exists:product_variants,id'];
             $rules['variants.*._delete'] = ['nullable', 'boolean'];
 
@@ -57,6 +57,9 @@ class ProductRequest extends FormRequest
                     'max:255',
                     Rule::unique('product_variants', 'sku')->ignore($variantId),
                 ];
+                if (empty($variant['_delete'])) {
+                    $rules["variants.{$key}.attributes"] = ['required', 'array'];
+                }
             }
         }
 

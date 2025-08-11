@@ -86,6 +86,7 @@
                     </ul>
                 </li>
                 <li><a href="/about-us">Về Chúng Tôi</a></li>
+                <li><a href="/tra-cuu-bao-hanh">Bảo hành</a></li>
                 <li><a href="/contact">Liên Hệ</a></li>
             </ul>
         </div>

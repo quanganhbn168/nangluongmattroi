@@ -34,7 +34,6 @@
             <label>c. Tạo biến thể</label><br>
             <button type="button" class="btn btn-secondary mt-2 mb-3" id="generate-variants-btn">Tạo các biến thể</button>
         </div>
-
         <div class="card bg-light p-2 mb-3" id="bulk-actions-container" style="display: none;">
             <div class="row align-items-center">
                 <div class="col-12 mb-2">
@@ -46,7 +45,6 @@
                 <div class="col-md-3"><button type="button" class="btn btn-primary btn-sm btn-block" id="apply-bulk-action-btn">Áp dụng cho mục đã chọn</button></div>
             </div>
         </div>
-
         <div id="variants-container">
             <table class="table table-bordered table-hover">
                 <thead>
@@ -56,7 +54,7 @@
                         <th style="width: 150px;">Giá</th>
                         <th style="width: 150px;">SKU</th>
                         <th style="width: 120px;">Tồn kho</th>
-                        <th style="width: 80px;">Hành động</th>
+                        <th style="width: 150px;">Hành động</th>
                     </tr>
                 </thead>
                 <tbody id="variants-tbody"></tbody>
@@ -64,7 +62,6 @@
         </div>
     </div>
 </div>
-
 <div class="modal fade" id="variant-edit-modal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -90,237 +87,222 @@
 $(document).ready(function() {
     const hasVariantsSwitch = $('input[name="has_variants"]');
     const variantsSection = $('#variants-section');
-        function debounce(func, delay) {
-            let timeout;
-            return function(...args) {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(this, args), delay);
-            };
-        }
-
-        const codeInput = $('input[name="code"]');
-        const codeStatusDiv = $('#code-check-status');
-        const productIdToIgnore = {{ $product->id ?? 'null' }};
-
-        const checkCode = debounce(function() {
-            const code = codeInput.val();
-            
-            if (code.length < 3) {
-                codeStatusDiv.html('');
-                return;
-            }
-
-            codeStatusDiv.html('<i class="fas fa-spinner fa-spin"></i><span class="ml-2">Đang kiểm tra...</span>');
-
-            $.ajax({
-                url: "{{ route('admin.ajax.products.check_code') }}",
-                type: 'GET',
-                data: { 
-                    code: code,
-                    ignore_id: productIdToIgnore 
-                },
-                success: function(response) {
-                    if (response.available) {
-                        codeStatusDiv.html('<span class="text-success"><i class="fas fa-check-circle"></i><span class="ml-2">Mã sản phẩm hợp lệ.</span></span>');
-                        codeInput.removeClass('is-invalid').addClass('is-valid');
-                    } else {
-                        codeStatusDiv.html('<span class="text-danger"><i class="fas fa-exclamation-circle"></i><span class="ml-2">Mã sản phẩm đã tồn tại!</span></span>');
-                        codeInput.removeClass('is-valid').addClass('is-invalid');
-                    }
-                },
-                error: function() {
-                     codeStatusDiv.html('<span class="text-warning"><i class="fas fa-exclamation-triangle"></i><span class="ml-2">Không thể kiểm tra mã.</span></span>');
-                }
-            });
-        }, 500);
-
-        codeInput.on('keyup', checkCode);
-    function toggleVariantsSection() {
-        if (hasVariantsSwitch.is(':checked')) {
-            variantsSection.slideDown();
-        } else {
-            variantsSection.slideUp();
-        }
-    }
-    hasVariantsSwitch.on('change', toggleVariantsSection);
-    toggleVariantsSection();
-
-    const allAttributes = @json($allAttributes ?? $attributes ?? []);
-    let initialProductData = @json($product ?? null);
+    const addAttributeSelector = $('#add-attribute-selector');
+    const attributeValuesArea = $('#attribute-values-area');
+    const generateVariantsBtn = $('#generate-variants-btn');
     const variantsTbody = $('#variants-tbody');
+    const codeInput = $('input[name="code"]');
+    const codeStatusDiv = $('#code-check-status');
+    const bulkContainer = $('#bulk-actions-container');
+    const bulkCount = $('#bulk-count');
+    const applyBulkBtn = $('#apply-bulk-action-btn');
+    const selectAllCheckbox = $('#select-all-variants');
+    const allAttributes = @json($allAttributes ?? $attributes ?? []);
+    const initialProductData = @json($product ?? null);
+    const productIdToIgnore = initialProductData ? initialProductData.id : null;
     let variantIndexCounter = {{ optional(optional($product ?? null)->variants)->max('id') ?? 0 }} + 1;
     function formatCurrency(number) {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(number);
     }
-
+    function debounce(func, delay) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+    /**
+     * Render HTML cho một hàng biến thể trong bảng
+     * @param {object} variant - Dữ liệu của biến thể
+     * @param {string|number} index - Index hoặc ID của biến thể
+     * @returns {string} - Chuỗi HTML
+     */
     function renderVariantRow(variant, index) {
         const variantName = (variant.attribute_values && Array.isArray(variant.attribute_values))
-        ? variant.attribute_values.map(v => v.value).join(' / ')
-        : 'Biến thể lỗi';
+            ? variant.attribute_values.map(v => v.value).join(' / ')
+            : (variant.name || 'N/A');
         const price = variant.price || 0;
         const sku = variant.sku || '';
-        const stock = variant.stock || 0;
-        
-        // ... hiddenInputs không đổi ...
+        const stock = variant.quantity || 0;
         let hiddenInputs = `<input type="hidden" class="variant-name" value="${variantName}">`;
-        if(variant.attribute_values && Array.isArray(variant.attribute_values)) {
+        hiddenInputs += `<input type="hidden" name="variants[${index}][price]" value="${price}">`;
+        hiddenInputs += `<input type="hidden" name="variants[${index}][sku]" value="${sku}">`;
+        hiddenInputs += `<input type="hidden" name="variants[${index}][stock]" value="${stock}">`;
+        if (variant.id) { 
+            hiddenInputs += `<input type="hidden" name="variants[${index}][id]" value="${variant.id}">`;
+        }
+        if (variant.attribute_values && Array.isArray(variant.attribute_values)) {
             variant.attribute_values.forEach(attrValue => {
                 hiddenInputs += `<input type="hidden" name="variants[${index}][attributes][${attrValue.attribute_id}]" value="${attrValue.value}">`;
             });
         }
-        if (variant.id) { hiddenInputs += `<input type="hidden" name="variants[${index}][id]" value="${variant.id}">`; }
-
         return `
             <tr class="variant-row" data-variant-id="${index}">
                 <td class="text-center"><input type="checkbox" class="variant-checkbox"></td>
                 <td class="variant-main-info">${variantName}</td>
-                <td class="variant-price"><span>${formatCurrency(price)}</span><input type="hidden" name="variants[${index}][price]" value="${price}"></td>
-                <td class="variant-sku">
-                    <div class="input-group">
-                        <input type="text" name="variants[${index}][sku]" value="${sku}" class="form-control">
-                        <div class="input-group-append">
-                            <button type="button" class="btn btn-sm btn-default btn-generate-sku" title="Tạo SKU gợi ý">
-                                <i class="fas fa-dice-d6"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <span style="display:none;">${sku}</span>
-                </td>
-                <td class="variant-stock"><span>${stock}</span><input type="hidden" name="variants[${index}][stock]" value="${stock}"></td>
+                <td class="variant-price"><span>${formatCurrency(price)}</span></td>
+                <td class="variant-sku"><span>${sku}</span></td>
+                <td class="variant-stock"><span>${stock}</span></td>
                 <td class="actions-cell text-center">
+                    <button type="button" class="btn btn-sm btn-info btn-edit-variant" title="Sửa"><i class="fas fa-pencil-alt"></i></button>
                     <button type="button" class="btn btn-sm btn-danger btn-delete-variant" title="Xóa"><i class="fas fa-trash"></i></button>
                 </td>
                 ${hiddenInputs}
             </tr>
         `;
     }
-    // Thêm đoạn code này vào trong $(document).ready(...)
-    variantsTbody.on('click', '.btn-generate-sku', function() {
-        const row = $(this).closest('.variant-row');
-        const productCode = $('input[name="code"]').val().toUpperCase() || 'SP';
-        const variantName = row.find('.variant-name').val(); // "Đỏ / S"
-
-        // Tạo SKU gợi ý từ mã sản phẩm và tên biến thể
-        const suggestedSku = productCode + '-' + variantName.replace(/ \/ /g, '-').replace(/\s+/g, '');
-        
-        // Điền vào ô input SKU
-        row.find('input[name*="[sku]"]').val(suggestedSku.toUpperCase());
-    });
-    const addAttributeSelector = $('#add-attribute-selector');
-    if (allAttributes && allAttributes.length > 0) {
-        allAttributes.forEach(attr => addAttributeSelector.append(new Option(attr.name, attr.id)));
-    }
-
-    addAttributeSelector.on('change', function() {
-        const attributeId = $(this).val();
+    /**
+     * Tạo một nhóm thuộc tính (ví dụ: Màu sắc) với các giá trị
+     * @param {number} attributeId - ID của thuộc tính
+     * @param {array} selectedValues - Các giá trị cần được chọn sẵn
+     */
+    function createAttributeGroup(attributeId, selectedValues = []) {
         const attribute = allAttributes.find(a => a.id == attributeId);
-        if (!attribute) return;
-        if ($(`#attribute-group-${attributeId}`).length > 0) { alert('Thuộc tính này đã được thêm.'); return; }
-
-        const groupHtml = `<div class="attribute-value-group" id="attribute-group-${attributeId}" data-attribute-id="${attributeId}"><i class="fas fa-times remove-attribute-group-btn" title="Xóa nhóm thuộc tính"></i><label class="font-weight-bold">${attribute.name}</label><select class="form-control attribute-value-select" multiple="multiple"></select></div>`;
-        $('#attribute-values-area').append(groupHtml);
-
+        if (!attribute || $(`#attribute-group-${attributeId}`).length > 0) return;
+        const groupHtml = `
+            <div class="attribute-value-group" id="attribute-group-${attributeId}" data-attribute-id="${attributeId}">
+                <i class="fas fa-times remove-attribute-group-btn" title="Xóa nhóm thuộc tính"></i>
+                <label class="font-weight-bold">${attribute.name}</label>
+                <select class="form-control attribute-value-select" multiple="multiple"></select>
+            </div>`;
+        attributeValuesArea.append(groupHtml);
         const newSelect = $(`#attribute-group-${attributeId} .attribute-value-select`);
-        const optionsData = attribute.values.map(val => {
-            const valueText = typeof val === 'object' ? val.value : val;
-            return { id: valueText, text: valueText };
-        });
-        
+        const optionsData = attribute.values.map(val => ({ id: val.value, text: val.value }));
         newSelect.select2({
             theme: 'bootstrap4',
             placeholder: `Chọn hoặc thêm giá trị cho ${attribute.name}`,
             tags: true,
             data: optionsData
         });
-        
-        $(this).val($(this).find('option:first').val());
+        if (selectedValues.length > 0) {
+            newSelect.val(selectedValues).trigger('change');
+        }
+    }
+    hasVariantsSwitch.on('change', () => variantsSection.slideToggle(hasVariantsSwitch.is(':checked'))).trigger('change');
+    addAttributeSelector.on('change', function() {
+        const attributeId = $(this).val();
+        if (attributeId) {
+            createAttributeGroup(attributeId);
+        }
+        $(this).val($(this).find('option:first').val()); 
     });
-
-    $('#attribute-values-area').on('click', '.remove-attribute-group-btn', function() {
+    attributeValuesArea.on('click', '.remove-attribute-group-btn', function() {
         $(this).closest('.attribute-value-group').remove();
     });
-
     $('#generate-variants-btn').on('click', function() {
+        const existingVariants = new Map();
+        variantsTbody.find('.variant-row').each(function() {
+            const row = $(this);
+            const name = row.find('.variant-name').val();
+            if (name) {
+                existingVariants.set(name, {
+                    id: row.find('input[name*="[id]"]').val(),
+                    price: row.find('input[name*="[price]"]').val(),
+                    sku: row.find('input[name*="[sku]"]').val(),
+                    stock: row.find('input[name*="[stock]"]').val(),
+                    attributes: Array.from(row.find('input[name*="[attributes]"]')).map(input => {
+                        const match = $(input).attr('name').match(/\[(\d+)\]/);
+                        return { attribute_id: match[1], value: $(input).val() };
+                    })
+                });
+            }
+        });
         const valueGroups = $('.attribute-value-group');
-        if (valueGroups.length === 0) { alert('Vui lòng thêm ít nhất một thuộc tính.'); return; }
-        const mainPrice = $('input[name="price_discount"]').val() || 0;
-        const productCode = $('input[name="code"]').val().toUpperCase() || 'SKU';
-
+        if (valueGroups.length === 0) {
+            alert('Vui lòng thêm ít nhất một thuộc tính.');
+            return;
+        }
+        let hasEmptyValues = false;
         const valueArrays = [];
         valueGroups.each(function() {
             const attributeId = $(this).data('attribute-id');
             const selectedValues = $(this).find('.attribute-value-select').val();
-            if (selectedValues && selectedValues.length > 0) {
-                valueArrays.push(selectedValues.map(v => ({ attributeId: attributeId, value: v })));
+            if (!selectedValues || selectedValues.length === 0) {
+                hasEmptyValues = true;
+            } else {
+                valueArrays.push(selectedValues.map(v => ({ attribute_id: attributeId, value: v })));
             }
         });
-
-        if (valueArrays.length !== valueGroups.length) { alert('Tất cả các nhóm thuộc tính phải có ít nhất một giá trị được chọn.'); return; }
-
+        if (hasEmptyValues) {
+            alert('Tất cả các nhóm thuộc tính phải có ít nhất một giá trị được chọn.');
+            return;
+        }
         const getCombinations = arrays => arrays.reduce((a, b) => a.flatMap(x => b.map(y => [...x, y])), [[]]);
         const combinations = getCombinations(valueArrays);
-
         variantsTbody.empty();
+        const productCode = $('input[name="code"]').val().toUpperCase() || 'SP';
         combinations.forEach(combo => {
-            const skuSuggestion = combo.map(c => c.value.substring(0, 3).toUpperCase()).join('-');
-            
-            const variantData = { 
-                attributeValues: combo,
-                price: mainPrice,
-                sku_placeholder: `${productCode}-${skuSuggestion}`
-            };
-            const rowHtml = renderVariantRow(variantData, `new_${variantIndexCounter++}`);
+            if (combo.length === 0) return;
+            const variantName = combo.map(c => c.value).join(' / ');
+            const existingVariantData = existingVariants.get(variantName);
+            let variantData;
+            let variantIndex;
+            if (existingVariantData) {
+                variantData = {
+                    id: existingVariantData.id,
+                    attribute_values: existingVariantData.attributes,
+                    price: existingVariantData.price,
+                    sku: existingVariantData.sku,
+                    stock: existingVariantData.stock
+                };
+                variantIndex = existingVariantData.id;
+            } else {
+                const skuSuggestion = productCode + '-' + combo.map(c => c.value.replace(/\s+/g, '').substring(0, 3)).join('-');
+                variantData = {
+                    id: null,
+                    attribute_values: combo,
+                    price: $('input[name="price_discount"]').val() || 0,
+                    sku: skuSuggestion.toUpperCase(),
+                    stock: 0
+                };
+                variantIndex = `new_${variantIndexCounter++}`;
+            }
+            const rowHtml = renderVariantRow(variantData, variantIndex);
             variantsTbody.append(rowHtml);
         });
+        selectAllCheckbox.prop('checked', false);
     });
-    variantsTbody.on('click', '.variant-row', function(e) {
-        if ($(e.target).is('input:checkbox') || $(e.target).closest('.actions-cell').length > 0) return;
-        openEditModal($(this));
-    });
-
-    function openEditModal(row) {
+    variantsTbody.on('click', '.btn-edit-variant', function(e) {
+        e.stopPropagation();
+        const row = $(this).closest('.variant-row');
         const variantId = row.data('variant-id');
         const name = row.find('.variant-name').val();
         const price = row.find('input[name*="[price]"]').val();
         const sku = row.find('input[name*="[sku]"]').val();
         const stock = row.find('input[name*="[stock]"]').val();
-
         $('#modal-variant-name').text(name);
         $('#modal-price').val(price);
         $('#modal-sku').val(sku);
         $('#modal-stock').val(stock);
         $('#modal-editing-variant-id').val(variantId);
         $('#variant-edit-modal').modal('show');
-    }
-
+    });
     $('#save-modal-changes-btn').on('click', function() {
         const variantId = $('#modal-editing-variant-id').val();
         const row = $(`.variant-row[data-variant-id="${variantId}"]`);
         const newPrice = $('#modal-price').val();
         const newSku = $('#modal-sku').val();
         const newStock = $('#modal-stock').val();
-
         row.find('input[name*="[price]"]').val(newPrice);
         row.find('input[name*="[sku]"]').val(newSku);
         row.find('input[name*="[stock]"]').val(newStock);
-
         row.find('.variant-price span').text(formatCurrency(newPrice));
         row.find('.variant-sku span').text(newSku);
         row.find('.variant-stock span').text(newStock);
-
         row.addClass('row-updated');
         setTimeout(() => row.removeClass('row-updated'), 1500);
         $('#variant-edit-modal').modal('hide');
     });
-
     variantsTbody.on('click', '.btn-delete-variant', function(e) {
         e.stopPropagation();
         const row = $(this).closest('.variant-row');
         if (confirm('Bạn có chắc muốn xóa biến thể này?')) {
-            const variantId = row.data('variant-id');
-            if (initialProductData && !String(variantId).startsWith('new_')) {
+            const variantId = String(row.data('variant-id'));
+            if (!variantId.startsWith('new_')) {
                 row.addClass('row-deleted');
-                row.append(`<input type="hidden" name="variants[${variantId}][_delete]" value="1">`);
+                if (row.find('input[name*="[_delete]"]').length === 0) {
+                    row.append(`<input type="hidden" name="variants[${variantId}][_delete]" value="1">`);
+                }
                 row.find('.variant-checkbox').prop('checked', false).prop('disabled', true);
             } else {
                 row.remove();
@@ -328,38 +310,27 @@ $(document).ready(function() {
             updateBulkActionsVisibility();
         }
     });
-
-    const bulkContainer = $('#bulk-actions-container');
-    const bulkCount = $('#bulk-count');
-
     function updateBulkActionsVisibility() {
         const selectedCount = variantsTbody.find('.variant-checkbox:not(:disabled):checked').length;
         selectedCount > 0 ? bulkContainer.slideDown('fast') : bulkContainer.slideUp('fast');
         bulkCount.text(selectedCount);
     }
     variantsTbody.on('change', '.variant-checkbox', updateBulkActionsVisibility);
-    $('#select-all-variants').on('change', function() {
+    selectAllCheckbox.on('change', function() {
         variantsTbody.find('.variant-checkbox:not(:disabled)').prop('checked', $(this).prop('checked'));
         updateBulkActionsVisibility();
     });
-
-    $('#apply-bulk-action-btn').on('click', function() {
+    applyBulkBtn.on('click', function() {
         const bulkPrice = $('#bulk-price').val();
         const bulkSku = $('#bulk-sku').val();
         const bulkStock = $('#bulk-stock').val();
-        if (bulkPrice === '' && bulkSku === '' && bulkStock === '') {
-            alert('Vui lòng nhập ít nhất một giá trị để áp dụng hàng loạt.');
-            return;
-        }
-
+        if (bulkPrice === '' && bulkSku === '' && bulkStock === '') return;
         variantsTbody.find('.variant-checkbox:checked').closest('tr').each(function() {
             const row = $(this);
             if (bulkPrice !== '') {
                 const newPrice = parseFloat(bulkPrice);
-                if (!isNaN(newPrice)) {
-                    row.find('input[name*="[price]"]').val(newPrice);
-                    row.find('.variant-price span').text(formatCurrency(newPrice));
-                }
+                row.find('input[name*="[price]"]').val(newPrice);
+                row.find('.variant-price span').text(formatCurrency(newPrice));
             }
             if (bulkSku !== '') {
                 row.find('input[name*="[sku]"]').val(bulkSku);
@@ -367,31 +338,62 @@ $(document).ready(function() {
             }
             if (bulkStock !== '') {
                 const newStock = parseInt(bulkStock);
-                if (!isNaN(newStock)) {
-                    row.find('input[name*="[stock]"]').val(newStock);
-                    row.find('.variant-stock span').text(newStock);
-                }
+                row.find('input[name*="[stock]"]').val(newStock);
+                row.find('.variant-stock span').text(newStock);
             }
             row.addClass('row-updated');
         });
-
         $('#bulk-price, #bulk-sku, #bulk-stock').val('');
         setTimeout(() => $('.row-updated').removeClass('row-updated'), 1500);
     });
-
-    // ===================================================================================
-    // === PHẦN 6: KHỞI TẠO BAN ĐẦU =======================================================
-    // ===================================================================================
-
+    if (allAttributes && allAttributes.length > 0) {
+        allAttributes.forEach(attr => addAttributeSelector.append(new Option(attr.name, attr.id)));
+    }
+    codeInput.on('keyup', debounce(function() {
+        const code = $(this).val();
+        if (code.length < 3) { codeStatusDiv.html(''); return; }
+        codeStatusDiv.html('<i class="fas fa-spinner fa-spin"></i> Đang kiểm tra...');
+        $.ajax({
+            url: "{{ route('admin.ajax.products.check_code') }}",
+            data: { code: code, ignore_id: productIdToIgnore },
+            success: function(response) {
+                if(response.available) {
+                    codeStatusDiv.html('<span class="text-success"><i class="fas fa-check-circle"></i> Mã hợp lệ.</span>');
+                } else {
+                    codeStatusDiv.html('<span class="text-danger"><i class="fas fa-exclamation-circle"></i> Mã đã tồn tại!</span>');
+                }
+            }
+        });
+    }, 500));
+    /**
+     * Hàm chính để khởi tạo giao diện ở chế độ sửa
+     */
     function initializeEditMode() {
-        if (!initialProductData) return;
-        $('#variant-generator-section').hide();
+        if (!initialProductData || !initialProductData.variants || initialProductData.variants.length === 0) {
+            return;
+        }
+        const usedAttributes = new Map();
+        initialProductData.variants.forEach(variant => {
+            if (variant.attribute_values && Array.isArray(variant.attribute_values)) {
+                variant.attribute_values.forEach(attrValue => {
+                    if (!usedAttributes.has(attrValue.attribute_id)) {
+                        usedAttributes.set(attrValue.attribute_id, new Set());
+                    }
+                    usedAttributes.get(attrValue.attribute_id).add(attrValue.value);
+                });
+            }
+        });
+        if (usedAttributes.size === 0) return;
+        usedAttributes.forEach((valuesSet, attributeId) => {
+            const selectedValues = Array.from(valuesSet);
+            createAttributeGroup(attributeId, selectedValues);
+        });
+        variantsTbody.empty();
         initialProductData.variants.forEach(variant => {
             const rowHtml = renderVariantRow(variant, variant.id);
             variantsTbody.append(rowHtml);
         });
     }
-
     initializeEditMode();
 });
 </script>

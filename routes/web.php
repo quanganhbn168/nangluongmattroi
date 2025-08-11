@@ -15,7 +15,7 @@ use App\Http\Controllers\SlugController;
 use UniSharp\LaravelFilemanager\Lfm;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
-
+use App\Http\Controllers\TrackingController;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\CustomerWelcomeEmail;
 
@@ -35,7 +35,8 @@ use App\Mail\CustomerWelcomeEmail;
 Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['auth:admin']], function () {
     Lfm::routes();
 });
-Route::get("/", [HomeController::class,"index"])->name("home"); 
+Route::get("/", [HomeController::class,"index"])->name("home");
+Route::get('/tra-cuu-bao-hanh', [TrackingController::class, 'index'])->name('order.tracking');
 Route::group(['prefix'=>'san-pham'], function(){
     Route::get('/', [ProductController::class,'allProduct'])->name('frontend.allProduct');
     Route::get('/{product:slug}', [ProductController::class,'show'])->name('frontend.product.show');
@@ -53,14 +54,20 @@ Route::get('/tim-kiem', [HomeController::class, 'search'])->name('frontend.post.
 Route::get('gioi-thieu', [IntroController::class,'show'])->name('intro.show');
 Route::get('lien-he',[ContactController::class,'show'])->name('contact.show');
 Route::post('lien-he',[ContactController::class,'store'])->name('contact.store');
-Route::prefix('cart')->group(function () {
-    Route::get('/', [CartController::class, 'index'])->name('cart.index');
-    Route::post('add', [CartController::class, 'add'])->name('cart.add');
-    Route::post('update', [CartController::class, 'update'])->name('cart.update');
-    Route::post('remove', [CartController::class, 'remove'])->name('cart.remove');
+Route::middleware('auth')->prefix('cart')->name('cart.')->group(function () {
+    Route::get('/', [CartController::class, 'index'])->name('index'); // Lấy thông tin giỏ hàng
+    Route::post('/add', [CartController::class, 'add'])->name('add');
+    Route::post('/update/{cartItemId}', [CartController::class, 'update'])->name('update');
+    Route::delete('/remove/{cartItemId}', [CartController::class, 'remove'])->name('remove');
+    Route::post('/clear', [CartController::class, 'clear'])->name('clear');
 });
-Route::get('checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-Route::post('checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+
+Route::get('/cart', [CartController::class, 'showCartPage'])->name('cart.page');
+
+Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+Route::post('/checkout', [CheckoutController::class, 'placeOrder'])->name('checkout.place');
+Route::get('/order-success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
+
 Route::get('thank-you',function(){
     return view('page/thank-you');
 })->name('thank-you');

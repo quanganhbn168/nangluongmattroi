@@ -1,94 +1,66 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập</title>
-    <link rel="stylesheet" href="{{asset('vendor/bootstrap/css/bootstrap.min.css')}}">
-    <style>
-        body, html {
-            height: 100%;
-        }
+@extends('layouts.master')
+@section('title','Đăng nhập tài khoản')
 
-        .login-left {
-            background: url('/images/setting/login-bg.jpg') center center / cover no-repeat;
-            height: 100vh;
-        }
+@push('css')
+<link rel="stylesheet" href="{{asset('css/auth.css')}}">
+@endpush
 
-        .login-right {
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+@section("content")
+<div id="breadcrumb" class="bg-light">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb bg-light m-0">
+                <li class="breadcrumb-item"><a href="{{ route('home') }}">Trang chủ</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Đăng nhập tài khoản</li>
+            </ol>
+        </nav>
+    </div>
+</div>
 
-        .login-form {
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .login-logo {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .login-logo img {
-            width: 150px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container-fluid h-100">
-        <div class="row h-100 no-gutters">
-            <!-- Bên trái: hình ảnh -->
-            <div class="col-md-6 d-none d-md-block login-left"></div>
-
-            <!-- Bên phải: form đăng nhập -->
-            <div class="col-md-6 login-right">
-                <div class="login-form">
-                    <div class="login-logo">
-                        <img src="images/setting/THT-media-logo.png" alt="Logo">
-                    </div>
-                    <form method="POST" action="/login">
+<div id="wrapper">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="login-box bg-white p-4 border">
+                    <h3 class="text-center mb-4">ĐĂNG NHẬP</h3>
+                    <form action="{{ route('login') }}" method="POST">
                         @csrf
-                        <h3 class="text-center mb-4">Đăng nhập</h3>
-
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input
-                                type="email"
-                                class="form-control"
-                                id="email"
-                                name="email"
-                                required
-                            >
+                        <div class="form-group mb-3">
+                            <input type="email" class="form-control @error('email') is-invalid @enderror" name="email" placeholder="Email" value="{{ old('email') }}" required>
+                            {{-- Hiển thị lỗi validation chung hoặc lỗi sai thông tin --}}
+                            @error('email')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                        </div>
+                        <div class="form-group mb-3">
+                            <input type="password" class="form-control @error('password') is-invalid @enderror" name="password" placeholder="Mật khẩu" required>
+                             @error('password')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                        </div>
+                        
+                        {{-- Thêm Ghi nhớ đăng nhập --}}
+                        <div class="form-group form-check mb-3">
+                            <input class="form-check-input" type="checkbox" name="remember" id="remember">
+                            <label class="form-check-label" for="remember">
+                                Ghi nhớ đăng nhập
+                            </label>
                         </div>
 
-                        <div class="form-group">
-                            <label for="password">Mật khẩu</label>
-                            <input
-                                type="password"
-                                class="form-control"
-                                id="password"
-                                name="password"
-                                required
-                            >
-                        </div>
-
-                        <div class="form-group form-check">
-                            <input type="checkbox" class="form-check-input" id="remember">
-                            <label class="form-check-label" for="remember">Ghi nhớ đăng nhập</label>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary btn-block">Đăng nhập</button>
+                        <button type="submit" class="btn btn-login w-100 mb-3">ĐĂNG NHẬP</button>
                     </form>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="#">Quên mật khẩu?</a>
+                        <a href="{{ route('register') }}">Đăng ký tại đây</a>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Script -->
-    <script src="{{asset('/js/jquery-3.7.1.min.js')}}?{{time()}}"></script>
-    <script src="{{asset('/vendor/bootstrap/js/bootstrap.min.js')}}?{{time()}}"></script>
-</body>
-</html>
+  </div>
+</div>
+@endsection

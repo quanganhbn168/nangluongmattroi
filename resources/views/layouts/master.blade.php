@@ -7,16 +7,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {{-- CSRF --}}
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
+    <meta name="is-authenticated" content="{{ Auth::check() ? 'true' : 'false' }}">
     {{-- Title & SEO --}}
     <title>@yield('title')</title>
     <meta name="description" content="@yield('meta_description', $setting->meta_description)">
     <meta name="keywords" content="@yield('meta_keywords', $setting->meta_keywords)">
     <meta name="robots" content="@yield('meta_robots', 'index, follow')">
-
     {{-- Canonical --}}
     <link rel="canonical" href="{{ url()->current() }}" />
-
     {{-- Open Graph --}}
     <meta property="og:type"        content="@yield('og_type','website')" />
     <meta property="og:title"       content="@yield('title', config('app.name')) " />
@@ -24,7 +22,6 @@
     <meta property="og:url"         content="{{ url()->current() }}" />
     <meta property="og:site_name"   content="{{ $setting->name }}" />
     <meta property="og:image"       content="@yield('meta_image', $setting->share_image)" />
-
     {{-- Twitter Card --}}
     <meta name="twitter:card"        content="summary_large_image" />
     <meta name="twitter:title"       content="@yield('title', config('app.name'))" />
@@ -47,7 +44,6 @@
     @stack('jsonld')
     @stack('conversion_script')
 </head>
-
 <body>
     {!!$setting->body_script!!}
     @include('partials.frontend.header')
@@ -71,7 +67,6 @@
         });
     </script>
     @endif
-
     @if(session('error'))
     <script>
         Swal.fire({
@@ -94,19 +89,14 @@
         });
     </script>
     <script type="text/javascript">
-        // Hàm này được gọi khi thư viện Google được tải xong
         function googleTranslateElementInit() {
             new google.translate.TranslateElement({
-                pageLanguage: 'vi',      // Ngôn ngữ gốc của trang
-                includedLanguages: 'vi,en', // Các ngôn ngữ cần dịch
+                pageLanguage: 'vi',      
+                includedLanguages: 'vi,en', 
                 autoDisplay: false
             }, 'google_translate_element');
-            
-            // Đặt trạng thái active cho cờ hiện tại
             setActiveFlag();
         }
-
-        // Hàm để thay đổi ngôn ngữ khi bấm vào cờ
         function changeLanguage(lang) {
             var a = document.querySelector("#google_translate_element select");
             if (a) {
@@ -114,8 +104,6 @@
                 a.dispatchEvent(new Event('change'));
             }
         }
-
-        // Hàm để làm nổi bật cờ của ngôn ngữ đang được chọn
         function setActiveFlag() {
             var currentLang = getCookie('googtrans') ? getCookie('googtrans').split('/')[2] : 'vi';
             document.querySelectorAll('.language-switcher-flags a').forEach(function(el) {
@@ -126,15 +114,11 @@
                 }
             });
         }
-
-        // Hàm tiện ích để đọc cookie
         function getCookie(name) {
             var value = "; " + document.cookie;
             var parts = value.split("; " + name + "=");
             if (parts.length == 2) return parts.pop().split(";").shift();
         }
-        
-        // Lắng nghe khi Google dịch xong để cập nhật lại cờ
         var originalTranslateElementInit = window.googleTranslateElementInit;
         window.googleTranslateElementInit = function() {
             originalTranslateElementInit();
@@ -154,20 +138,98 @@
     <script>
         $(document).ready(function(){
             $('#contactModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget); // Nút được bấm
-            var productName = button.data('name'); // Lấy tên sản phẩm từ data-name
+            var button = $(event.relatedTarget); 
+            var productName = button.data('name'); 
             var modal = $(this);
-            
-            // Tạo chuỗi nội dung quan tâm
             var messageContent = "Tôi đang quan tâm đến sản phẩm: " + productName + "\n\n";
-            
-            // Đặt nội dung này vào textarea
-            // Đồng thời di chuyển con trỏ xuống cuối để khách hàng gõ tiếp
             var messageTextarea = modal.find('textarea#message');
             messageTextarea.val(messageContent).focus();
             messageTextarea[0].setSelectionRange(messageContent.length, messageContent.length);
         });
         });
+    </script>
+    <script>
+        $(document).ready(function() {
+            $('.add-to-cart-btn').on('click', function(e) {
+                e.preventDefault();
+                const productId = $(this).data('product-id');
+        const quantity = 1; 
+        const isAuthenticated = $('meta[name="is-authenticated"]').attr('content') === 'true';
+        if (isAuthenticated) {
+            addToCartAPI(productId, quantity);
+        } else {
+            addToCartLocalStorage(productId, quantity);
+        }
+    });
+            function addToCartAPI(productId, quantity) {
+                $.ajax({
+            url: '{{ route("cart.add") }}', 
+            method: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}', 
+                product_id: productId,
+                quantity: quantity
+            },
+            success: function(response) {
+                alert(response.message); 
+                $('body').addClass('show-cart-offcanvas');
+            },
+            error: function(xhr) {
+                alert('Có lỗi xảy ra, vui lòng thử lại.');
+            }
+        });
+            }
+            function addToCartLocalStorage(productId, quantity) {
+                let cart = JSON.parse(localStorage.getItem('cart')) || [];
+                const existingItem = cart.find(item => item.productId === productId);
+                if (existingItem) {
+                    existingItem.quantity += quantity;
+                } else {
+                    const productName = $('.add-to-cart-btn[data-product-id="' + productId + '"]').data('product-name');
+                    const productPrice = $('.add-to-cart-btn[data-product-id="' + productId + '"]').data('product-price');
+                    const productImage = $('.add-to-cart-btn[data-product-id="' + productId + '"]').data('product-image');
+                    cart.push({ 
+                        productId: productId, 
+                        quantity: quantity,
+                        name: productName,
+                        price: productPrice,
+                        image: productImage
+                    });
+                }
+                localStorage.setItem('cart', JSON.stringify(cart));
+                alert('Sản phẩm đã được thêm vào giỏ!');
+                updateOffCanvasFromLocalStorage();
+                $('body').addClass('show-cart-offcanvas');
+            }
+            function updateOffCanvasFromLocalStorage() {
+                const cart = JSON.parse(localStorage.getItem('cart')) || [];
+                const offcanvasBody = $('.offcanvas-body');
+        offcanvasBody.empty(); 
+        let totalPrice = 0;
+        if (cart.length === 0) {
+            offcanvasBody.html('<p class="text-center">Giỏ hàng của bạn đang trống.</p>');
+        } else {
+            cart.forEach(item => {
+                const itemHtml = `
+                    <div class="cart-item" data-id="${item.productId}">
+                        <div class="cart-item_image"><img src="${item.image}" alt="${item.name}"></div>
+                        <div class="cart-item_info">
+                            <a href="#" class="item-name">${item.name}</a>
+                            <div class="item-meta">
+                                <span class="item-price">${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price)}</span>
+                                <span class="item-quantity">x ${item.quantity}</span>
+                            </div>
+                        </div>
+                        <a href="#" class="item-remove"><i class="fa fa-trash"></i></a>
+                    </div>
+                `;
+                offcanvasBody.append(itemHtml);
+                totalPrice += item.price * item.quantity;
+            });
+        }
+        $('.offcanvas-footer .total-price').text(new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalPrice));
+    }
+        }
     </script>
     @stack('js')
 </body>

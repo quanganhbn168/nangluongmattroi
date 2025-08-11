@@ -14,6 +14,16 @@
         </div>
 
         <div class="card-body">
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <h4 class="alert-heading"><i class="icon fas fa-ban"></i> Dữ liệu không hợp lệ!</h4>
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
             {{-- Nav tabs (giữ nguyên cấu trúc) --}}
             <ul class="nav nav-pills mb-3" id="product-tabs" role="tablist">
                 <li class="nav-item">

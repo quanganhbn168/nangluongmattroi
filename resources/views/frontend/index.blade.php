@@ -229,6 +229,13 @@
                     </div>
                     <div class="product-item_info">
                         <h3><a href="">Tấm pin năng lượng mặt trời</a></h3>
+                        {{-- <button class="add-to-cart-btn" 
+                            data-product-id="{{ $product->id }}"
+                            data-product-name="{{ $product->name }}"
+                            data-product-price="{{ $product->price }}"
+                            data-product-image="{{ asset($product->image) }}">
+                            Thêm vào giỏ
+                        </button> --}}
                         <span class="price text-danger text-bold">Gọi để biết giá</span>
                     </div>
                 </div>
