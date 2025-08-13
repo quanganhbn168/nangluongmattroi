@@ -7,7 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {{-- CSRF --}}
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="is-authenticated" content="{{ Auth::check() ? 'true' : 'false' }}">
     {{-- Title & SEO --}}
     <title>@yield('title')</title>
     <meta name="description" content="@yield('meta_description', $setting->meta_description)">
@@ -44,7 +43,7 @@
     @stack('jsonld')
     @stack('conversion_script')
 </head>
-<body>
+<body class="{{ Auth::check() ? 'logged-in' : '' }}">
     {!!$setting->body_script!!}
     @include('partials.frontend.header')
     @yield('content')
@@ -147,89 +146,6 @@
             messageTextarea[0].setSelectionRange(messageContent.length, messageContent.length);
         });
         });
-    </script>
-    <script>
-        $(document).ready(function() {
-            $('.add-to-cart-btn').on('click', function(e) {
-                e.preventDefault();
-                const productId = $(this).data('product-id');
-        const quantity = 1; 
-        const isAuthenticated = $('meta[name="is-authenticated"]').attr('content') === 'true';
-        if (isAuthenticated) {
-            addToCartAPI(productId, quantity);
-        } else {
-            addToCartLocalStorage(productId, quantity);
-        }
-    });
-            function addToCartAPI(productId, quantity) {
-                $.ajax({
-            url: '{{ route("cart.add") }}', 
-            method: 'POST',
-            data: {
-                _token: '{{ csrf_token() }}', 
-                product_id: productId,
-                quantity: quantity
-            },
-            success: function(response) {
-                alert(response.message); 
-                $('body').addClass('show-cart-offcanvas');
-            },
-            error: function(xhr) {
-                alert('Có lỗi xảy ra, vui lòng thử lại.');
-            }
-        });
-            }
-            function addToCartLocalStorage(productId, quantity) {
-                let cart = JSON.parse(localStorage.getItem('cart')) || [];
-                const existingItem = cart.find(item => item.productId === productId);
-                if (existingItem) {
-                    existingItem.quantity += quantity;
-                } else {
-                    const productName = $('.add-to-cart-btn[data-product-id="' + productId + '"]').data('product-name');
-                    const productPrice = $('.add-to-cart-btn[data-product-id="' + productId + '"]').data('product-price');
-                    const productImage = $('.add-to-cart-btn[data-product-id="' + productId + '"]').data('product-image');
-                    cart.push({ 
-                        productId: productId, 
-                        quantity: quantity,
-                        name: productName,
-                        price: productPrice,
-                        image: productImage
-                    });
-                }
-                localStorage.setItem('cart', JSON.stringify(cart));
-                alert('Sản phẩm đã được thêm vào giỏ!');
-                updateOffCanvasFromLocalStorage();
-                $('body').addClass('show-cart-offcanvas');
-            }
-            function updateOffCanvasFromLocalStorage() {
-                const cart = JSON.parse(localStorage.getItem('cart')) || [];
-                const offcanvasBody = $('.offcanvas-body');
-        offcanvasBody.empty(); 
-        let totalPrice = 0;
-        if (cart.length === 0) {
-            offcanvasBody.html('<p class="text-center">Giỏ hàng của bạn đang trống.</p>');
-        } else {
-            cart.forEach(item => {
-                const itemHtml = `
-                    <div class="cart-item" data-id="${item.productId}">
-                        <div class="cart-item_image"><img src="${item.image}" alt="${item.name}"></div>
-                        <div class="cart-item_info">
-                            <a href="#" class="item-name">${item.name}</a>
-                            <div class="item-meta">
-                                <span class="item-price">${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price)}</span>
-                                <span class="item-quantity">x ${item.quantity}</span>
-                            </div>
-                        </div>
-                        <a href="#" class="item-remove"><i class="fa fa-trash"></i></a>
-                    </div>
-                `;
-                offcanvasBody.append(itemHtml);
-                totalPrice += item.price * item.quantity;
-            });
-        }
-        $('.offcanvas-footer .total-price').text(new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalPrice));
-    }
-        }
     </script>
     @stack('js')
 </body>

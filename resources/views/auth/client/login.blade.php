@@ -20,47 +20,50 @@
 <div id="wrapper">
   <div class="container py-5">
     <div class="row justify-content-center">
-            <div class="col-md-6 col-lg-5">
-                <div class="login-box bg-white p-4 border">
-                    <h3 class="text-center mb-4">ĐĂNG NHẬP</h3>
-                    <form action="{{ route('login') }}" method="POST">
-                        @csrf
-                        <div class="form-group mb-3">
-                            <input type="email" class="form-control @error('email') is-invalid @enderror" name="email" placeholder="Email" value="{{ old('email') }}" required>
-                            {{-- Hiển thị lỗi validation chung hoặc lỗi sai thông tin --}}
-                            @error('email')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                            @enderror
-                        </div>
-                        <div class="form-group mb-3">
-                            <input type="password" class="form-control @error('password') is-invalid @enderror" name="password" placeholder="Mật khẩu" required>
-                             @error('password')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                            @enderror
-                        </div>
-                        
-                        {{-- Thêm Ghi nhớ đăng nhập --}}
-                        <div class="form-group form-check mb-3">
-                            <input class="form-check-input" type="checkbox" name="remember" id="remember">
-                            <label class="form-check-label" for="remember">
-                                Ghi nhớ đăng nhập
-                            </label>
-                        </div>
-
-                        <button type="submit" class="btn btn-login w-100 mb-3">ĐĂNG NHẬP</button>
-                    </form>
+        <div class="col-md-6 col-lg-5">
+            <div class="login-box bg-white p-4 border">
+                <h3 class="text-center mb-4">ĐĂNG NHẬP</h3>
+                <form action="{{ route('login') }}" method="POST">
+                    @csrf
                     
-                    <div class="d-flex justify-content-between">
-                        <a href="#">Quên mật khẩu?</a>
-                        <a href="{{ route('register') }}">Đăng ký tại đây</a>
+                    {{-- Đổi từ email sang số điện thoại --}}
+                    <div class="form-group mb-3">
+                        <input type="text" class="form-control @error('phone') is-invalid @enderror" name="phone" placeholder="Số điện thoại" value="{{ old('phone') }}" required autofocus>
+                        
+                        {{-- Hiển thị lỗi validation chung hoặc lỗi sai thông tin --}}
+                        @error('phone')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
                     </div>
+
+                    <div class="form-group mb-3">
+                        <input type="password" class="form-control @error('password') is-invalid @enderror" name="password" placeholder="Mật khẩu" required>
+                         @error('password')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
+                    </div>
+                    
+                    <div class="form-group form-check mb-3">
+                        <input class="form-check-input" type="checkbox" name="remember" id="remember">
+                        <label class="form-check-label" for="remember">
+                            Ghi nhớ đăng nhập
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-login w-100 mb-3">ĐĂNG NHẬP</button>
+                </form>
+                
+                <div class="d-flex justify-content-between">
+                    <a href="#">Quên mật khẩu?</a>
+                    <a href="{{ route('register') }}">Đăng ký tại đây</a>
                 </div>
             </div>
         </div>
+    </div>
   </div>
 </div>
 @endsection

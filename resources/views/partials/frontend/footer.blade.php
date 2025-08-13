@@ -1,151 +1,154 @@
-@push('css')
-<style>
-</style>
-@endpush
-<div class="bottom-contact">
-    <a href="{{$setting->zalo}}" class="bottom-contact_link">
-    	<img src="{{asset("images/setting/Icon_of_Zalo.svg")}}" alt="zalo contact" width="40" height="40">
-    </a>
-    <a href="{{$setting->mess}}" class="bottom-contact_link">
-    	<img src="{{asset("images/setting/Facebook_Messenger_logo_2020.svg")}}" alt="" width="40" height="40">
-    </a>
-    {{-- <a href="#" class="bottom-contact_link">
-    	<img src="{{asset("images/setting/youtube.svg")}}" alt="" width="40" height="40">
-    </a> --}}
-    <a href="tel:{{$setting->phone}}" class="bottom-contact_link">
-    	<img src="{{asset("images/setting/phone.svg")}}" alt="" width="40" height="40">
+<div class="page-pills">
+    <div class="contact-pills d-none d-md-flex flex-column gap-2">
+        <a href="{{ $setting->zalo }}" target="_blank" class="contact-pill" aria-label="Liên hệ Zalo">
+            <img src="{{ asset('images/setting/Icon_of_Zalo.svg') }}" alt="zalo icon">
+        </a>
+        <a href="{{ $setting->mess }}" target="_blank" class="contact-pill" aria-label="Liên hệ Messenger">
+            <img src="{{ asset('images/setting/Facebook_Messenger_logo_2020.svg') }}" alt="messenger icon">
+        </a>
+        <a href="tel:{{ $setting->phone }}" class="contact-pill" aria-label="Gọi điện thoại">
+            <img src="{{ asset('images/setting/phone.svg') }}" alt="phone icon">
+        </a>
+    </div>
+    <a href="#" class="gotop d-none d-md-flex" aria-label="Lên đầu trang">
+        <i class="fa-solid fa-arrow-up"></i>
     </a>
 </div>
-<div class="mobile-bottom-nav d-flex align-items-center justify-content-between d-md-none px-2 py-1">
-    {{-- Menu trái --}}
-    <a href="#danh-muc" class="nav-item text-center">
+<nav class="mobile-bottom-nav d-md-none">
+    <a href="#danh-muc" class="mobile-nav-item">
         <i class="fa-solid fa-list"></i>
-        <div class="nav-label">Danh mục</div>
+        <span class="mobile-nav-label">Danh mục</span>
     </a>
-    <a href="tel:{{ $setting->phone ?? '0123456789' }}" class="nav-item text-center">
+    <a href="tel:{{ $setting->phone ?? '' }}" class="mobile-nav-item">
         <i class="fa-solid fa-phone"></i>
-        <div class="nav-label">Gọi</div>
+        <span class="mobile-nav-label">Gọi</span>
     </a>
-    {{-- Trang chủ ở giữa --}}
-    <a href="{{ url('/') }}" class="nav-item text-center">
+    <a href="{{ url('/') }}" class="mobile-nav-item">
         <i class="fa-solid fa-home"></i>
-        <div class="nav-label">Trang chủ</div>
+        <span class="mobile-nav-label">Trang chủ</span>
     </a>
-    {{-- Menu phải --}}
-    <a href="https://zalo.me/" class="nav-item text-center">
+    <a href="{{ $setting->zalo ?? '#' }}" target="_blank" class="mobile-nav-item">
         <i class="fa-solid fa-comments"></i>
-        <div class="nav-label">Zalo</div>
+        <span class="mobile-nav-label">Zalo</span>
     </a>
-    {{-- Nút lên đầu trang (vẫn trong nav) --}}
-    <a href="#" class="nav-item gotop-mobile text-center" title="Lên đầu trang">
+    <a href="#" class="mobile-nav-item gotop-mobile">
         <i class="fa-solid fa-arrow-up"></i>
-        <div class="nav-label">Top</div>
+        <span class="mobile-nav-label">Top</span>
     </a>
-</div>
-<div class="d-none d-md-inline-block">
-	<a href="#" class="gotop">
-        <i class="fa-solid fa-arrow-up"></i>
-    </a>
-</div>
-<footer id="footer" class="footer-wrapper">
-	<div class="container">
-		<div class="row">
-			<div class="col-12 col-md-5 col-sm-12">
-				<div class="footer-item">
-					<p class="footer-item_title">Thông tin liên hệ</p>
-					<div class="footer-logo text-center">
-						<img src="{{asset($setting->logo)}}" alt="{{$setting->name}}">
-					</div>
-					<ul class="footer-item_list">
-						<li class="item_list">
-							<h3><strong>{{$setting->name}}</strong></h3>
-						</li>
-						<li class="item_list">
-							<i class="fa-solid fa-location-dot"></i>
-							<span>Trụ sở chính: {{$setting->address}}</span>
-						</li>
-						@php
-						$footerbranches = DB::table('branches')->where('status',1)->select('name','address')->get();
-						@endphp
-						@foreach($footerbranches as $footerbranch)
-						<li class="item_list">
-							<i class="fa-solid fa-location-dot"></i>
-							<span>{{$footerbranch->name}}: {{$footerbranch->address}}</span>
-						</li>
-						@endforeach
-						<li class="item_list">
-							<i class="fa-solid fa-phone"></i>
-							Điện thoại: <a href="tel:{{$setting->phone}}">{{$setting->phone}}</a>
-						</li>
-						<li class="item_list">
-							<i class="fa-regular fa-envelope"></i>
-							Email:<a href="mailto:{{$setting->email}}">{{$setting->email}}</a>
-						</li>
-					</ul>
-				</div>
-			</div>
-			<div class="col-12 col-md-3 col-sm-12">
-				<div class="footer-item">
-					<p class="footer-item_title">Chính sách</p>
-					<ul class="footer-item_list">
-						<li class="item_list">
-							<a href="/">Trang chủ</a>
-						</li>
-						<li>
-							<a href="/gioi-thieu">Giới thiệu</a>
-						</li>
-					</ul>
-				</div>
-			</div>
-			<div class="col-12 col-md-4 col-sm-12">
-				<div class="footer-item">
-					<form action="{{route('contact.store')}}" id="contact-form">
-						<p>Đăng ký nhận tư vấn miễn phí</p>
-						<input type="text" name="name" placeholder="Họ và tên" required>
-						<input type="text" name="phone" placeholder="Số điện thoại" required>
-						<input type="text" name="email" placeholder="Email">
-						<input type="text" name="message" placeholder="Nội dung">
-						<div>
-							<button class="btn btn-primary" type="submit">Đăng ký</button>
-						</div>
-					</form>
-				</div>
-				<div class="footer-item">
-					<p class="footer-item_title">Kết nối với chúng tôi</p>
-					<div>
-						<iframe src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fprofile.php%3Fid%3D61575732317538&tabs&width=340&height=130&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId=7715792338477816" width="340" height="130" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</footer>				
-<div class="copyright bg-light">
-	<div class="container">
-		<div class="row">
-			<p class="text-center">© Bản quyền thuộc về {{$setting->name}}</p>
-			<p class="text-center">Nhà cung cấp <a href="https://truyenthongtht.com">THT Media</a></p>
-		</div>
-	</div>
-</div>
+</nav>
+<footer class="footer">
+    <div class="container">
+        <div class="row gy-4">
+            <div class="col-lg-5 col-md-12">
+                <div class="footer__item">
+                    <h4 class="footer__title">Thông tin liên hệ</h4>
+                    <div class="footer__logo mb-3">
+                        <img src="{{ asset($setting->logo) }}" alt="{{ $setting->name }}">
+                    </div>
+                    <ul class="footer__list">
+                        <li>
+                            <h5 class="company-name">{{ $setting->name }}</h5>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-location-dot"></i>
+                            <span><strong>Trụ sở chính:</strong> {{ $setting->address }}</span>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-phone"></i>
+                            <span><strong>Điện thoại:</strong> <a href="tel:{{ $setting->phone }}">{{ $setting->phone }}</a></span>
+                        </li>
+                        <li>
+                            <i class="fa-regular fa-envelope"></i>
+                            <span><strong>Email:</strong> <a href="mailto:{{ $setting->email }}">{{ $setting->email }}</a></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="footer__item">
+                    <h4 class="footer__title">Chính sách</h4>
+                    <ul class="footer__list">
+                        <li><a href="/">Trang chủ</a></li>
+                        <li><a href="/gioi-thieu">Giới thiệu</a></li>
+                        <li><a href="/chinh-sach-bao-hanh">Chính sách bảo hành</a></li>
+                        <li><a href="/chinh-sach-doi-tra">Chính sách đổi trả</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="footer__item">
+                    <h4 class="footer__title">Đăng ký nhận tư vấn</h4>
+                    <form action="{{ route('contact.store') }}" method="POST" id="footer-contact-form">
+                        @csrf
+                        <div class="form-group">
+                            <input type="text" name="name" class="form-control" placeholder="Họ và tên" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="tel" name="phone" class="form-control" placeholder="Số điện thoại" required>
+                        </div>
+                        <div class="form-group">
+                            <textarea name="message" class="form-control" placeholder="Nội dung cần tư vấn..."></textarea>
+                        </div>
+                        <button class="btn btn-primary w-100" type="submit">Gửi yêu cầu</button>
+                    </form>
+                    <div id="form-message" class="mt-3"></div>
+                </div>
+                {{-- <div class="footer__item">
+                    <h4 class="footer__title">Kết nối với chúng tôi</h4>
+                    <div class="footer__social">
+                        <iframe src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fprofile.php%3Fid%3D61575732317538&tabs&width=340&height=130&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId=7715792338477816" width="340" height="130" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+                    </div>
+                </div> --}}
+            </div>
+        </div>
+    </div>
+    <div class="copyright">
+        <div class="container text-center">
+            <p>© Bản quyền thuộc về <strong>{{ $setting->name }}</strong></p>
+            <p class="tht-credit">Thiết kế và phát triển bởi <a href="https://truyenthongtht.com" target="_blank" rel="noopener">THT Media</a></p>
+        </div>
+    </div>
+</footer>
 @push('js')
 <script>
-    $(document).ready(function () {
-        const gotop = $('.gotop');
-        // 1. Show go-to-top when scroll
-        $(window).on('scroll', function () {
-            if ($(this).scrollTop() > 200) {
-                gotop.addClass('show');
-            } else {
-                gotop.removeClass('show');
+$(document).ready(function () {
+    const gotopDesktop = $('.gotop'); 
+    $(window).on('scroll', function () {
+        if ($(this).scrollTop() > 200) {
+            gotopDesktop.addClass('show');
+        } else {
+            gotopDesktop.removeClass('show');
+        }
+    });
+    $('.gotop, .gotop-mobile').on('click', function (e) {
+        e.preventDefault();
+        $('html, body').animate({ scrollTop: 0 }, 600); 
+    });
+    $('#footer-contact-form').on('submit', function(e) {
+        e.preventDefault(); 
+        var form = $(this);
+        var submitButton = form.find('button[type="submit"]');
+        var formMessage = $('#form-message');
+        submitButton.prop('disabled', true).text('Đang gửi...');
+        formMessage.html(''); 
+        $.ajax({
+            url: form.attr('action'),
+            method: 'POST',
+            data: form.serialize(),
+            success: function(response) {
+                formMessage.html('<div class="alert alert-success mt-2">Yêu cầu của bạn đã được gửi. Chúng tôi sẽ liên hệ lại sớm!</div>');
+                form[0].reset(); 
+            },
+            error: function(xhr) {
+                formMessage.html('<div class="alert alert-danger mt-2">Đã có lỗi xảy ra. Vui lòng thử lại.</div>');
+            },
+            complete: function() {
+                setTimeout(function() {
+                    submitButton.prop('disabled', false).text('Gửi yêu cầu');
+                }, 2000);
             }
         });
-        // 2. Smooth scroll to top
-        $('.gotop').on('click', function (e) {
-            e.preventDefault();
-            $('html, body').animate({ scrollTop: 0 }, 600);
-        });
     });
+});
 </script>
 @endpush
-		

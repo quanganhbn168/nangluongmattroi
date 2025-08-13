@@ -19,6 +19,9 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\TagController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\WarrantyController;
 use App\Http\Controllers\AttributeController;
 use App\Http\Controllers\AttributeValueController;
 
@@ -40,6 +43,9 @@ Route::middleware(['auth:admin'])->prefix('admin')->as('admin.')->group(function
     Route::post('/slides/{slide}/toggle-status', [SlideController::class, 'toggleStatus'])
       ->name('slides.toggle-status');
     Route::resource('projects', ProjectController::class);
+    Route::resource('roles', RoleController::class);
+    Route::resource('users', UserController::class);
+    Route::resource('orders', OrderController::class);
     Route::resource('service_categories', ServiceCategoryController::class);
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
     Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
@@ -62,4 +68,7 @@ Route::middleware(['auth:admin'])->prefix('admin')->as('admin.')->group(function
     Route::post('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
     Route::get('/ajax/products/check-code', [ProductController::class, 'checkCodeUniqueness'])->name('ajax.products.check_code');
     Route::resource('branches', BranchController::class);
+
+    Route::get('/warranty', [WarrantyController::class, 'index'])->name('warranty.index');
+    Route::post('/warranty/search', [WarrantyController::class, 'search'])->name('warranty.search');
 });

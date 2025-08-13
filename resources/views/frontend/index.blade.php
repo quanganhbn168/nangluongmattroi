@@ -57,17 +57,20 @@
 <section id="slider">
     <div class="container">
         <div class="row">
+            
             <div class="col-lg-8 col-12">
                 @include("partials.frontend.slide")
             </div>
-            <div class="col-lg-4 col-12">
-                <div class="banner-home p-2 mb-2">
-                    <img src="https://placehold.co/500x250" alt="">
-                </div>
-                <div class="banner-home p-2 mb-2">
-                    <img src="https://placehold.co/500x250" alt="">
-                </div>
+
+            
+            
+            <div class="col-lg-4 col-12 d-flex flex-column justify-content-between">
                 
+                @foreach($banners as $banner)
+                <div class="banner-home">  
+                    <img src="{{asset($banner->image)}}" alt="" class="img-fluid"> img-fluid để ảnh responsive --}}
+                </div>
+                @endforeach
             </div>
         </div>
     </div>
@@ -123,233 +126,53 @@
         </div>
         <div class="categories-wrapper">
             <div class="row">
-                <div class="col-6 col-md-4 col-lg-2">
-                    <div class="categories-item">
-                        <div class="categories-item_image">
-                            <img src="https://placehold.co/300x300/005a9c/FFFFFF?text=Tấm+Pin" alt="Tấm Pin Năng Lượng Mặt Trời">
-                        </div>
-                        <div class="categories-item_name">
-                            <a href="#">Tấm Pin Mặt Trời</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 col-md-4 col-lg-2">
-                    <div class="categories-item">
-                        <div class="categories-item_image">
-                            <img src="https://placehold.co/300x300/ffc107/333333?text=Inverter" alt="Biến tần (Inverter)">
-                        </div>
-                        <div class="categories-item_name">
-                            <a href="#">Biến Tần (Inverter)</a>
+                
+                @forelse ($featuredCategories as $category)
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <div class="categories-item">
+                            <div class="categories-item_image">
+                                
+                                <a href="#">
+                                    <img src="{{ asset($category->image) }}" alt="{{ $category->name }}">
+                                </a>
+                            </div>
+                            <div class="categories-item_name">
+                                <a href="#">{{ $category->name }}</a>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-6 col-md-4 col-lg-2">
-                    <div class="categories-item">
-                        <div class="categories-item_image">
-                            <img src="https://placehold.co/300x300/005a9c/FFFFFF?text=Pin+Lưu+Trữ" alt="Pin Lưu Trữ">
-                        </div>
-                        <div class="categories-item_name">
-                            <a href="#">Pin Lưu Trữ (Hybrid)</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 col-md-4 col-lg-2">
-                    <div class="categories-item">
-                        <div class="categories-item_image">
-                            <img src="https://placehold.co/300x300/ffc107/333333?text=Phụ+Kiện" alt="Phụ kiện lắp đặt">
-                        </div>
-                        <div class="categories-item_name">
-                            <a href="#">Phụ Kiện Lắp Đặt</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 col-md-4 col-lg-2">
-                    <div class="categories-item">
-                        <div class="categories-item_image">
-                            <img src="https://placehold.co/300x300/005a9c/FFFFFF?text=Đèn+NLMT" alt="Đèn năng lượng mặt trời">
-                        </div>
-                        <div class="categories-item_name">
-                            <a href="#">Đèn Năng Lượng Mặt Trời</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 col-md-4 col-lg-2">
-                    <div class="categories-item">
-                        <div class="categories-item_image">
-                            <img src="https://placehold.co/300x300/ffc107/333333?text=Hệ+Thống+Bơm" alt="Hệ thống bơm NLMT">
-                        </div>
-                        <div class="categories-item_name">
-                            <a href="#">Hệ Thống Bơm NLMT</a>
-                        </div>
-                    </div>
-                </div>
+                @empty
+                    <p class="col-12">Chưa có danh mục nổi bật nào.</p>
+                @endforelse
             </div>
         </div>
     </div>
 </section>
+
+@foreach ($categoriesWithProducts as $category)
 <section class="product-list">
     <div class="container">
         <div class="product-widget">
             <div class="widget-title">
                 <h3>
-                    <a href="">Tấm pin năng lượng mặt trời</a>
+                    <a href="{{route('products.by_category',$category->slug)}}">{{ $category->name }}</a>
                 </h3>
                 <div class="widget-tool">
-                    <a href="">Xem thêm <i class="fa-solid fa-angles-right"></i></a>
+                    <a href="{{route('products.by_category',$category->slug)}}">Xem thêm <i class="fa-solid fa-angles-right"></i></a>
                 </div>
             </div>
             <div class="product-widget_wrapper">
-                <div class="product-item">
-                    <div class="product-item_image">
-                        <a href="">
-                            <img src="https://placehold.co/400" alt="">
-                        </a>
-                    </div>
-                    <div class="product-item_info">
-                        <h3><a href="">Tấm pin năng lượng mặt trời</a></h3>
-                        <span class="price text-danger text-bold">Gọi để biết giá</span>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-item_image">
-                        <a href="">
-                            <img src="https://placehold.co/400" alt="">
-                        </a>
-                    </div>
-                    <div class="product-item_info">
-                        <h3><a href="">Tấm pin năng lượng mặt trời</a></h3>
-                        <span class="price text-danger text-bold">Gọi để biết giá</span>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-item_image">
-                        <a href="">
-                            <img src="https://placehold.co/400" alt="">
-                        </a>
-                    </div>
-                    <div class="product-item_info">
-                        <h3><a href="">Tấm pin năng lượng mặt trời</a></h3>
-                        {{-- <button class="add-to-cart-btn" 
-                            data-product-id="{{ $product->id }}"
-                            data-product-name="{{ $product->name }}"
-                            data-product-price="{{ $product->price }}"
-                            data-product-image="{{ asset($product->image) }}">
-                            Thêm vào giỏ
-                        </button> --}}
-                        <span class="price text-danger text-bold">Gọi để biết giá</span>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-item_image">
-                        <a href="">
-                            <img src="https://placehold.co/400" alt="">
-                        </a>
-                    </div>
-                    <div class="product-item_info">
-                        <h3><a href="">Tấm pin năng lượng mặt trời</a></h3>
-                        <span class="price text-danger text-bold">Gọi để biết giá</span>
-                    </div>
-                </div>
                 
+                @forelse ($category->products as $product)
+                    @include('partials.frontend.product_item', ['product' => $product])
+                @empty
+                    <p class="col-12">Chưa có sản phẩm nào trong danh mục này.</p>
+                @endforelse
             </div>
         </div>
     </div>
 </section>
-<section class="product-list">
-    <div class="container">
-        <div class="product-widget">
-            <div class="widget-title">
-                <h3>
-                    <a href="">Bộ lưu trữ năng lượng mặt trời</a>
-                </h3>
-                <div class="widget-tool">
-                    <a href="">Xem thêm <i class="fa-solid fa-angles-right"></i></a>
-                </div>
-            </div>
-            <div class="product-widget_wrapper">
-                <div class="product-item">
-                    <div class="product-item_image">
-                        <a href="">
-                            <img src="https://placehold.co/400" alt="">
-                        </a>
-                    </div>
-                    <div class="product-item_info">
-                        <h3><a href="">Tấm pin năng lượng mặt trời</a></h3>
-                        <span class="price text-danger text-bold">Gọi để biết giá</span>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-item_image">
-                        <a href="">
-                            <img src="https://placehold.co/400" alt="">
-                        </a>
-                    </div>
-                    <div class="product-item_info">
-                        <h3><a href="">Tấm pin năng lượng mặt trời</a></h3>
-                        <span class="price text-danger text-bold">Gọi để biết giá</span>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-item_image">
-                        <a href="">
-                            <img src="https://placehold.co/400" alt="">
-                        </a>
-                    </div>
-                    <div class="product-item_info">
-                        <h3><a href="">Tấm pin năng lượng mặt trời</a></h3>
-                        <span class="price text-danger text-bold">Gọi để biết giá</span>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-item_image">
-                        <a href="">
-                            <img src="https://placehold.co/400" alt="">
-                        </a>
-                    </div>
-                    <div class="product-item_info">
-                        <h3><a href="">Tấm pin năng lượng mặt trời</a></h3>
-                        <span class="price text-danger text-bold">Gọi để biết giá</span>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-item_image">
-                        <a href="">
-                            <img src="https://placehold.co/400" alt="">
-                        </a>
-                    </div>
-                    <div class="product-item_info">
-                        <h3><a href="">Tấm pin năng lượng mặt trời</a></h3>
-                        <span class="price text-danger text-bold">Gọi để biết giá</span>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <div class="product-item_image">
-                        <a href="">
-                            <img src="https://placehold.co/400" alt="">
-                        </a>
-                    </div>
-                    <div class="product-item_info">
-                        <h3><a href="">Tấm pin năng lượng mặt trời</a></h3>
-                        <span class="price text-danger text-bold">Gọi để biết giá</span>
-                    </div>
-                </div>
-                
-                <div class="product-item">
-                    <div class="product-item_image">
-                        <a href="">
-                            <img src="https://placehold.co/400" alt="">
-                        </a>
-                    </div>
-                    <div class="product-item_info">
-                        <h3><a href="">Tấm pin năng lượng mặt trời</a></h3>
-                        <span class="price text-danger text-bold">Gọi để biết giá</span>
-                    </div>
-                </div>
-                
-            </div>
-        </div>
-    </div>
-</section>
+@endforeach
 <section class="news">
     <div class="container">
         <h2 class="section-title">
@@ -555,4 +378,32 @@
         counters.forEach(counter => observer.observe(counter));
     });
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    new Swiper('.swiper.slider', {
+        slidesPerView: 1,
+        loop: true,
+        speed: 600,
+
+        // Tự chạy
+        autoplay: {
+            delay: 3000,
+            disableOnInteraction: false
+        },
+
+        // Dấu chấm phân trang
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true
+        },
+
+        // Nút điều hướng
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev'
+        }
+    });
+});
+</script>
 @endpush
+

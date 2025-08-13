@@ -1,57 +1,49 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Product;
-use App\Models\CartItem; // Giả sử bạn đã tạo model này
-
+use App\Models\CartItem;
+use Illuminate\Support\Facades\DB;
 class CartController extends Controller
 {
-    // Lấy tất cả item trong giỏ hàng
     public function index()
     {
         $cartItems = Auth::user()->cartItems()->with('product')->get();
         return response()->json($cartItems);
     }
-
-    // Thêm sản phẩm vào giỏ
     public function add(Request $request)
     {
         $request->validate([
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
         ]);
-
         $user = Auth::user();
         $cartItem = CartItem::where('user_id', $user->id)
                             ->where('product_id', $request->product_id)
                             ->first();
-
         if ($cartItem) {
-            // Nếu đã có, cập nhật số lượng
             $cartItem->quantity += $request->quantity;
             $cartItem->save();
         } else {
-            // Nếu chưa có, tạo mới
             $cartItem = CartItem::create([
                 'user_id' => $user->id,
                 'product_id' => $request->product_id,
                 'quantity' => $request->quantity,
             ]);
         }
-        
-        return response()->json(['message' => 'Sản phẩm đã được thêm vào giỏ!', 'cart' => $this->getCartData()]);
-    }
+        $cartData = $this->getCartDataForAPI();
 
-    // Cập nhật số lượng
+        return response()->json([
+            'success' => true,
+            'message' => 'Sản phẩm đã được thêm vào giỏ hàng!',
+            'cart'    => $cartData
+        ]);
+    }
     public function update(Request $request, $cartItemId)
     {
         $request->validate(['quantity' => 'required|integer|min:0']);
-        
         $cartItem = CartItem::where('id', $cartItemId)->where('user_id', Auth::id())->firstOrFail();
-
         if ($request->quantity == 0) {
             $cartItem->delete();
             $message = 'Sản phẩm đã được xóa khỏi giỏ!';
@@ -59,36 +51,115 @@ class CartController extends Controller
             $cartItem->update(['quantity' => $request->quantity]);
             $message = 'Giỏ hàng đã được cập nhật!';
         }
-        
         return response()->json(['message' => $message, 'cart' => $this->getCartData()]);
     }
-
-    // Xóa sản phẩm
     public function remove($cartItemId)
     {
+    
         CartItem::where('id', $cartItemId)->where('user_id', Auth::id())->firstOrFail()->delete();
-        return response()->json(['message' => 'Sản phẩm đã được xóa khỏi giỏ!', 'cart' => $this->getCartData()]);
-    }
 
-    // Lấy dữ liệu giỏ hàng để trả về cho front-end
+    
+    
+        return response()->json([
+            'success' => true,
+            'message' => 'Sản phẩm đã được xóa khỏi giỏ!',
+        'cart' => $this->getCartDataForAPI() 
+    ]);
+    }
     private function getCartData()
     {
-        // Viết hàm để lấy và tính toán tổng tiền, số lượng...
-        // Tạm thời trả về số lượng item
         return Auth::user()->cartItems()->count();
     }
-
-    // Thêm vào trong class CartController
     public function showCartPage()
     {
-    // Lấy các mục trong giỏ hàng CỦA NGƯỜI DÙNG ĐÃ ĐĂNG NHẬP
-    // Với khách vãng lai, giỏ hàng sẽ được render bằng JavaScript
-        $cartItems = [];
+    // Dù có check Auth hay không, chúng ta luôn cần biến $cartItems trong view.
+        $cartItems = []; 
+        
+    // Nếu người dùng đã đăng nhập, lấy dữ liệu từ database.
         if (Auth::check()) {
-        // Nhớ thêm quan hệ cartItems() trong Model User nhé
-            $cartItems = Auth::user()->cartItems()->with('product')->get();
+        // Dùng lại hàm getCartDataForAPI() để có cấu trúc dữ liệu đồng nhất
+        // và đảm bảo có đủ thông tin (product, total_price, etc.)
+        // Lấy mảng 'items' từ kết quả trả về.
+            $cartData = $this->getCartDataForAPI();
+            $cartItems = $cartData['items']; 
+        }
+        
+    // Truyền biến $cartItems vào view.
+        return view('cart.index', ['cartItems' => $cartItems]);
+    }
+    public function buyNow(Request $request)
+    {
+        $request->validate([
+            'product_id' => ['required','integer'],
+            'variant_id' => ['nullable','integer'],
+            'quantity'   => ['required','integer','min:1'],
+        ]);
+        $productId = (int) ($request->input('variant_id') ?: $request->input('product_id'));
+        $qty       = (int) $request->input('quantity');
+        if (Auth::check()) {
+            $user = Auth::user();
+            $user->cartItems()->updateOrCreate(
+                ['product_id' => $productId],
+                ['quantity'   => DB::raw('GREATEST(quantity,0) + '.$qty)]
+            );
+        } else {
+            $cart = session()->get('guest_cart', []);
+            $found = false;
+            foreach ($cart as &$item) {
+                if ((int)$item['id'] === $productId) {
+                    $item['quantity'] = (int)$item['quantity'] + $qty;
+                    $found = true;
+                    break;
+                }
+            }
+            if (!$found) {
+                $cart[] = ['id' => $productId, 'quantity' => $qty];
+            }
+            session(['guest_cart' => $cart]);
+        }
+        return redirect()->route('checkout.index');
+    }
+
+    private function getCartDataForAPI()
+    {
+        $user = auth()->user();
+        $cartItems = CartItem::where('user_id', $user->id)->with('product')->get();
+        $total_price = $cartItems->sum(function($item) {
+            return $item->quantity * $item->product->price;
+        });
+        $total_quantity = $cartItems->sum('quantity');
+
+        return [
+            'items'          => $cartItems,
+            'total_price'    => $total_price,
+            'total_quantity' => $total_quantity,
+        ];
+    }
+
+    public function merge(Request $request)
+    {
+        $guestCart = $request->input('guest_cart', []);
+        $user = auth()->user();
+
+        if ($user && !empty($guestCart)) {
+            foreach ($guestCart as $guestItem) {
+                $existingItem = CartItem::where('user_id', $user->id)
+                ->where('product_id', $guestItem['id'])
+                ->first();
+
+                if ($existingItem) {
+                    $existingItem->quantity += $guestItem['quantity'];
+                    $existingItem->save();
+                } else {
+                    CartItem::create([
+                        'user_id' => $user->id,
+                        'product_id' => $guestItem['id'],
+                        'quantity' => $guestItem['quantity'],
+                    ]);
+                }
+            }
         }
 
-        return view('cart.index', ['cartItems' => $cartItems]);
+        return response()->json(['success' => true, 'message' => 'Giỏ hàng đã được gộp.']);
     }
 }

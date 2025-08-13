@@ -20,13 +20,13 @@
         <!-- User Dropdown Menu -->
         <li class="nav-item dropdown user-menu">
             <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-                <img src="{{ asset($setting->logo) }}" class="user-image img-circle elevation-2" alt="User Image">
+                <img src="{{asset('favicon/icon-192.png')}}" class="user-image img-circle elevation-2" alt="User Image">
                 <span class="d-none d-md-inline">{{ auth()->user()->name }}</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
                 <!-- User image -->
                 <li class="user-header bg-primary">
-                    <img src="{{ asset($setting->logo) }}" class="img-circle elevation-2" alt="User Image">
+                    <img src="{{asset('favicon/icon-192.png')}}" class="img-circle elevation-2" alt="User Image">
                     <p>
                         {{ auth()->user()->name }}
                         <small>Member since {{ auth()->user()->created_at->format('M Y') }}</small>

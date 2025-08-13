@@ -1,67 +1,49 @@
 @extends('layouts.master')
 @section('title', 'Giỏ hàng của bạn')
-
 @section('content')
 <div class="container py-5">
     <h2 class="mb-4">Giỏ hàng của bạn</h2>
     <div class="row">
-        <div class="col-lg-8" id="cart-items-container">
-            {{-- Dành cho người dùng đã đăng nhập --}}
-            @auth
-                @forelse ($cartItems as $item)
-                    <div class="card mb-3 cart-item-row" data-item-id="{{ $item->id }}">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div class="d-flex flex-row align-items-center">
-                                    <div>
-                                        <img src="{{ asset($item->product->image) }}" class="img-fluid rounded-3" alt="Shopping item" style="width: 65px;">
-                                    </div>
-                                    <div class="ms-3">
-                                        <h5>{{ $item->product->name }}</h5>
-                                        <p class="small mb-0">{{ number_format($item->product->price) }}đ</p>
-                                    </div>
-                                </div>
-                                <div class="d-flex flex-row align-items-center">
-                                    <div style="width: 100px;">
-                                        <input type="number" class="form-control quantity-input" value="{{ $item->quantity }}" min="0">
-                                    </div>
-                                    <h5 class="ms-4 me-4 item-subtotal">{{ number_format($item->product->price * $item->quantity) }}đ</h5>
-                                    <a href="#!" class="text-danger remove-item-btn"><i class="fas fa-trash fa-lg"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @empty
-                    <p>Giỏ hàng của bạn đang trống.</p>
-                @endforelse
-            @endauth
-
-            {{-- Dành cho khách vãng lai, JS sẽ render vào đây --}}
-            @guest
-                <div id="guest-cart-items">
-                    <p>Giỏ hàng của bạn đang trống.</p>
-                </div>
-            @endguest
+        {{-- Bảng chứa các sản phẩm trong giỏ hàng --}}
+        <div class="col-lg-8">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col" colspan="2">Sản phẩm</th>
+                            <th scope="col" class="text-center">Đơn giá</th>
+                            <th scope="col" class="text-center">Số lượng</th>
+                            <th scope="col" class="text-end">Tạm tính</th>
+                            <th scope="col" class="text-center">Xóa</th>
+                        </tr>
+                    </thead>
+                    {{-- JavaScript sẽ render các dòng sản phẩm vào tbody này --}}
+                    <tbody id="cart-items-container">
+                    </tbody>
+                </table>
+            </div>
         </div>
+        {{-- Cột tóm tắt đơn hàng --}}
         <div class="col-lg-4">
-            <div class="card">
+            <div class="card shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title">Tóm tắt đơn hàng</h5>
-                    <hr>
-                    <div class="d-flex justify-content-between">
-                        <p class="mb-2">Tạm tính</p>
-                        <p class="mb-2" id="summary-subtotal">0đ</p>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <p class="mb-2">Phí vận chuyển</p>
-                        <p class="mb-2">Miễn phí</p>
-                    </div>
-                    <hr>
-                    <div class="d-flex justify-content-between">
-                        <p class="mb-2">Tổng cộng</p>
-                        <p class="mb-2 fw-bold" id="summary-total">0đ</p>
-                    </div>
-
+                    <ul class="list-group list-group-flush mt-3">
+                        <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 pb-0">
+                            Tạm tính
+                            <span id="summary-subtotal">0đ</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                            Phí vận chuyển
+                            <span>Miễn phí</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 mb-3">
+                            <div>
+                                <strong>Tổng cộng</strong>
+                            </div>
+                            <span><strong id="summary-total">0đ</strong></span>
+                        </li>
+                    </ul>
                     <a href="{{ route('checkout.index') }}" class="btn btn-primary w-100 mt-3">
                         Tiến hành Thanh toán
                     </a>
@@ -70,144 +52,159 @@
         </div>
     </div>
 </div>
+{{-- TEMPLATE CHO MỘT DÒNG SẢN PHẨM TRONG BẢNG (GIAO DIỆN MỚI) --}}
+<template id="cart-item-template">
+    <tr class="cart-item-row" data-id="__ID__">
+        <td style="width: 80px;">
+            <img src="__IMAGE__" class="img-fluid rounded" alt="__NAME__">
+        </td>
+        <td>
+            <h6 class="mb-0">__NAME__</h6>
+        </td>
+        <td class="text-center price-per-item" data-price="__PRICE_RAW__">__PRICE__</td>
+        <td style="width: 150px;" class="text-center">
+            {{-- Bắt đầu khối Input Group đã nâng cấp --}}
+            <div class="input-group input-group-sm mx-auto" style="max-width: 120px;">
+                <div class="input-group-prepend">
+                    <button class="btn btn-outline-secondary btn-minus" type="button">-</button>
+                </div>
+                <input type="number" class="form-control text-center quantity-input" value="__QUANTITY__" min="0">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary btn-plus" type="button">+</button>
+                </div>
+            </div>
+            {{-- Kết thúc khối Input Group --}}
+        </td>
+        <td class="text-end item-subtotal">__SUBTOTAL__</td>
+        <td class="text-center">
+            <a href="#!" class="text-danger remove-item-btn"><i class="fas fa-trash"></i></a>
+        </td>
+    </tr>
+</template>
 @endsection
-
 @push('js')
 <script>
-    $(document).ready(function() {
-        // --- HÀM TIỆN ÍCH ---
-        const formatCurrency = (number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(number);
-
-        // --- HÀM CẬP NHẬT GIAO DIỆN ---
-        function updateCartSummary() {
-            let total = 0;
-            $('.cart-item-row').each(function() {
-                const priceText = $(this).find('.small').text().replace(/[^0-9]/g, '');
-                const quantity = $(this).find('.quantity-input').val();
-                const price = parseInt(priceText, 10);
-
-                if (!isNaN(price) && !isNaN(quantity)) {
-                    const subtotal = price * quantity;
-                    $(this).find('.item-subtotal').text(formatCurrency(subtotal));
-                    total += subtotal;
-                }
-            });
-            $('#summary-subtotal').text(formatCurrency(total));
-            $('#summary-total').text(formatCurrency(total));
-        }
-
-        // --- HÀM DÀNH CHO KHÁCH VÃNG LAI ---
-        function renderGuestCart() {
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const container = $('#guest-cart-items');
-            container.empty();
-
-            if (cart.length === 0) {
-                container.html('<p>Giỏ hàng của bạn đang trống.</p>');
-                return;
-            }
-
-            cart.forEach(item => {
-                const itemHtml = `
-                    <div class="card mb-3 cart-item-row" data-product-id="${item.productId}">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div class="d-flex flex-row align-items-center">
-                                    <div><img src="${item.image}" class="img-fluid rounded-3" style="width: 65px;"></div>
-                                    <div class="ms-3">
-                                        <h5>${item.name}</h5>
-                                        <p class="small mb-0">${formatCurrency(item.price)}</p>
-                                    </div>
-                                </div>
-                                <div class="d-flex flex-row align-items-center">
-                                    <div style="width: 100px;"><input type="number" class="form-control quantity-input" value="${item.quantity}" min="0"></div>
-                                    <h5 class="ms-4 me-4 item-subtotal">${formatCurrency(item.price * item.quantity)}</h5>
-                                    <a href="#!" class="text-danger remove-item-btn"><i class="fas fa-trash fa-lg"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                container.append(itemHtml);
-            });
-            updateCartSummary();
-        }
-
-        // --- XỬ LÝ SỰ KIỆN ---
-        // Cập nhật số lượng
-        $('#cart-items-container').on('change', '.quantity-input', function() {
-            const quantity = $(this).val();
-            const cartItemRow = $(this).closest('.cart-item-row');
-
-            if ('{{ Auth::check() }}') {
-                // Logic cho người dùng đã đăng nhập
-                const itemId = cartItemRow.data('item-id');
-                $.ajax({
-                    url: `/cart/update/${itemId}`,
-                    method: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        quantity: quantity,
-                    },
-                    success: function(response) {
-                        if (quantity == 0) {
-                            cartItemRow.remove();
-                        }
-                        updateCartSummary();
-                    }
-                });
-            } else {
-                // Logic cho khách vãng lai
-                const productId = cartItemRow.data('product-id');
-                let cart = JSON.parse(localStorage.getItem('cart')) || [];
-                if (quantity == 0) {
-                    cart = cart.filter(item => item.productId != productId);
-                    cartItemRow.remove();
-                } else {
-                    const itemInCart = cart.find(item => item.productId == productId);
-                    if (itemInCart) {
-                        itemInCart.quantity = quantity;
-                    }
-                }
-                localStorage.setItem('cart', JSON.stringify(cart));
-                updateCartSummary();
+$(document).ready(function() {
+    const isGuest = {{ Auth::check() ? 'false' : 'true' }};
+    const csrfToken = '{{ csrf_token() }}';
+    const cartTbody = $('#cart-items-container');
+    const itemTemplate = $('#cart-item-template').html();
+    const STORAGE_KEY = 'guest_cart';
+    const baseUrl = '{{ url('/') }}';
+    const formatCurrency = (number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(number);
+    function updateCartSummary() {
+        let total = 0;
+        $('.cart-item-row').each(function() {
+            const price = parseFloat($(this).find('.price-per-item').data('price'));
+            const quantity = parseInt($(this).find('.quantity-input').val(), 10);
+            if (!isNaN(price) && !isNaN(quantity)) {
+                const subtotal = price * quantity;
+                $(this).find('.item-subtotal').text(formatCurrency(subtotal));
+                total += subtotal;
             }
         });
-
-        // Xóa sản phẩm
-        $('#cart-items-container').on('click', '.remove-item-btn', function(e) {
-            e.preventDefault();
-            const cartItemRow = $(this).closest('.cart-item-row');
-
-            if ('{{ Auth::check() }}') {
-                const itemId = cartItemRow.data('item-id');
-                $.ajax({
-                    url: `/cart/remove/${itemId}`,
-                    method: 'DELETE',
-                    data: { _token: '{{ csrf_token() }}' },
-                    success: function(response) {
-                        cartItemRow.remove();
-                        updateCartSummary();
-                    }
-                });
-            } else {
-                const productId = cartItemRow.data('product-id');
-                let cart = JSON.parse(localStorage.getItem('cart')) || [];
-                cart = cart.filter(item => item.productId != productId);
-                localStorage.setItem('cart', JSON.stringify(cart));
+        $('#summary-subtotal').text(formatCurrency(total));
+        $('#summary-total').text(formatCurrency(total));
+    }
+    function renderCart(items) {
+        cartTbody.empty();
+        if (!items || items.length === 0) {
+            const emptyRow = `<tr><td colspan="6" class="text-center py-4">Giỏ hàng của bạn đang trống.</td></tr>`;
+            cartTbody.html(emptyRow);
+            updateCartSummary();
+            return;
+        }
+        items.forEach(item => {
+            const product = isGuest ? item : item.product;
+            const price = parseFloat(product.price_discount || product.price);
+            const quantity = item.quantity;
+            const itemHtml = itemTemplate
+                .replace(/__ID__/g, isGuest ? item.id : item.id) 
+                .replace(/__IMAGE__/g, isGuest ? item.image : `${baseUrl}/${product.image}`)
+                .replace(/__NAME__/g, product.name)
+                .replace(/__PRICE_RAW__/g, price)
+                .replace(/__PRICE__/g, formatCurrency(price))
+                .replace(/__QUANTITY__/g, quantity)
+                .replace(/__SUBTOTAL__/g, formatCurrency(price * quantity));
+            cartTbody.append(itemHtml);
+        });
+        updateCartSummary();
+    }
+    function handleQuantityChange(input) {
+        const cartItemRow = $(input).closest('.cart-item-row');
+        const quantity = parseInt($(input).val(), 10);
+        const itemId = cartItemRow.data('id');
+        if (!isGuest) { 
+            $.ajax({
+                url: `/cart/update/${itemId}`,
+                method: 'POST', 
+                data: { 
+                    _token: csrfToken, 
+                    _method: 'PUT', 
+                    quantity: quantity 
+                },
+                success: function(response) {
+                    if (quantity == 0) cartItemRow.remove();
+                    updateCartSummary();
+                }
+            });
+        } else { 
+            let cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+            if (quantity == 0) {
+                cart = cart.filter(item => item.id != itemId);
                 cartItemRow.remove();
-                updateCartSummary();
+            } else {
+                const itemInCart = cart.find(item => item.id == itemId);
+                if (itemInCart) itemInCart.quantity = quantity;
             }
-        });
-
-        // --- KHỞI TẠO BAN ĐẦU ---
-        @guest
-            renderGuestCart();
-        @endguest
-
-        @auth
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
             updateCartSummary();
-        @endauth
+        }
+    }
+    function handleRemoveItem(button) {
+        const cartItemRow = $(button).closest('.cart-item-row');
+        const itemId = cartItemRow.data('id');
+        if (!isGuest) { 
+            if (!confirm('Bạn chắc chắn muốn xóa sản phẩm này?')) return;
+            $.ajax({
+                url: `/cart/remove/${itemId}`,
+                method: 'POST', 
+                data: { 
+                    _token: csrfToken,
+                    _method: 'DELETE' 
+                },
+                success: function(response) {
+                    cartItemRow.remove();
+                    updateCartSummary();
+                }
+            });
+        } else { 
+            let cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+            cart = cart.filter(item => item.id != itemId);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+            cartItemRow.remove();
+            updateCartSummary();
+        }
+    }
+    cartTbody.on('click', '.btn-plus, .btn-minus', function() {
+        const input = $(this).closest('.input-group').find('.quantity-input');
+        let currentValue = parseInt(input.val(), 10);
+        if ($(this).hasClass('btn-plus')) {
+            currentValue++;
+        } else {
+            currentValue = currentValue > 0 ? currentValue - 1 : 0;
+        }
+        input.val(currentValue).trigger('change');
     });
+    cartTbody.on('change', '.quantity-input', function() { handleQuantityChange(this); });
+    cartTbody.on('click', '.remove-item-btn', function(e) { e.preventDefault(); handleRemoveItem(this); });
+    @auth('web')
+        const authCartItems = {!! json_encode($cartItems ?? []) !!};
+        renderCart(authCartItems);
+    @else
+        const guestCartItems = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        renderCart(guestCartItems);
+    @endauth
+});
 </script>
 @endpush

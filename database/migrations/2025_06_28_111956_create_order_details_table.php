@@ -19,6 +19,7 @@ return new class extends Migration
             $table->decimal('product_price', 15, 2); 
             $table->integer('quantity')->default(1);
             $table->decimal('subtotal', 15, 2); 
+            $table->unsignedInteger('warranty_months')->default(0)->comment('Thời gian bảo hành tính theo tháng');
             $table->timestamp('warranty_expires_at')->nullable(); 
             $table->timestamps();
         });

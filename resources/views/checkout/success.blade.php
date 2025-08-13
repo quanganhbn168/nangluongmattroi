@@ -5,7 +5,7 @@
 <div class="container py-5 text-center">
     <i class="fas fa-check-circle fa-5x text-success mb-4"></i>
     <h2>Đặt hàng thành công!</h2>
-    <p>Cảm ơn bạn đã mua hàng. Mã đơn hàng của bạn là <strong>#{{ $order->id }}</strong>.</p>
+    <p>Cảm ơn bạn đã mua hàng. Mã đơn hàng của bạn là <strong>#{{ $order->code }}</strong>.</p>
     <p>Chúng tôi sẽ liên hệ với bạn để xác nhận đơn hàng trong thời gian sớm nhất.</p>
 
     {{-- Hiển thị QR Code nếu là chuyển khoản --}}
@@ -13,10 +13,10 @@
         <div class="mt-5 p-4 border rounded" style="max-width: 450px; margin: auto;">
             @php
                 $bankId = "970436"; // Ví dụ: Vietcombank
-                $accountNo = "YOUR_ACCOUNT_NO"; // SỐ TÀI KHOẢN CỦA BẠN
-                $accountName = "YOUR_ACCOUNT_NAME"; // TÊN CHỦ TK CỦA BẠN
+                $accountNo = "105867163975"; // SỐ TÀI KHOẢN CỦA BẠN
+                $accountName = "TRAN QUANG ANH"; // TÊN CHỦ TK CỦA BẠN
                 $amount = $order->total_price;
-                $note = "NLMT " . $order->id; // Nội dung chuyển khoản ngắn gọn
+                $note = "NLMT " . $order->code; // Nội dung chuyển khoản ngắn gọn
                 $qrCodeUrl = "https://api.vietqr.io/image/{$bankId}-{$accountNo}-print.png?amount={$amount}&addInfo=" . urlencode($note) . "&accountName=" . urlencode($accountName);
             @endphp
             <h4>Quét mã QR để thanh toán</h4>
